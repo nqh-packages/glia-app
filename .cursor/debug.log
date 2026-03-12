@@ -1,0 +1,12 @@
+{"location":"main.js:init","message":"script run","data":{"appExists":true,"viewCount":5},"timestamp":1773356268065,"hypothesisId":"H1"}
+{"location":"main.js:setView","message":"setView called","data":{"viewId":"landing","appExists":true},"timestamp":1773356268066,"hypothesisId":"H1","runId":"post-fix"}
+{"location":"main.js:setView","message":"setView called","data":{"viewId":"create","appExists":true},"timestamp":1773356273388,"hypothesisId":"H1","runId":"post-fix"}
+{"location":"main.js:setView","message":"setView called","data":{"viewId":"landing","appExists":true},"timestamp":1773356275667,"hypothesisId":"H1","runId":"post-fix"}
+{"location":"main.js:setView","message":"setView called","data":{"viewId":"create","appExists":true},"timestamp":1773356278898,"hypothesisId":"H1","runId":"post-fix"}
+{"location":"main.js:setView","message":"setView called","data":{"viewId":"room-created","appExists":true},"timestamp":1773356293462,"hypothesisId":"H1","runId":"post-fix"}
+{"location":"main.js:setView","message":"setView called","data":{"viewId":"room","appExists":true},"timestamp":1773356300453,"hypothesisId":"H1","runId":"post-fix"}
+{"location":"main.js:init","message":"script run","data":{"appExists":true,"viewCount":5},"timestamp":1773356394852,"hypothesisId":"H1"}
+{"location":"main.js:setView","message":"setView called","data":{"viewId":"landing","appExists":true},"timestamp":1773356394853,"hypothesisId":"H1","runId":"post-fix"}
+{"location":"main.js:setView","message":"setView called","data":{"viewId":"create","appExists":true},"timestamp":1773356575587,"hypothesisId":"H1","runId":"post-fix"}
+{"location":"main.js:setView","message":"setView called","data":{"viewId":"room-created","appExists":true},"timestamp":1773356586156,"hypothesisId":"H1","runId":"post-fix"}
+{"location":"main.js:setView","message":"setView called","data":{"viewId":"room","appExists":true},"timestamp":1773356613142,"hypothesisId":"H1","runId":"post-fix"}

@@ -8,39 +8,132 @@
 </head>
 <body>
   <main id="app">
-    <!-- INPUT SECTION (Francisco + Valentina) -->
-    <section id="input-section">
+    <!-- LANDING: Create or join a room -->
+    <section id="view-landing" class="view">
       <h1>Glia</h1>
-      <p class="subtitle">Paste a community discussion. Get a data-driven compromise.</p>
+      <p class="subtitle">Start a discussion room. Collect opinions, gather votes, get a data-driven compromise.</p>
 
-      <div id="input-area">
-        <textarea id="text-input" placeholder="Paste WhatsApp messages, Reddit comments, or any community discussion here..."></textarea>
-
-        <div id="image-upload">
-          <label for="image-input">Or drop screenshots:</label>
-          <input type="file" id="image-input" accept="image/*" multiple>
+      <div class="landing-actions">
+        <button id="btn-create-room" type="button" class="btn btn-primary">Create a room</button>
+        <div class="join-block">
+          <label for="join-code" class="label">Join with code</label>
+          <div class="join-row">
+            <input type="text" id="join-code" placeholder="e.g. ABC12" maxlength="8" autocomplete="off">
+            <input type="text" id="join-name" placeholder="Your name" class="join-name">
+            <button id="btn-join-room" type="button" class="btn btn-secondary">Join</button>
+          </div>
         </div>
+      </div>
+      <p id="landing-error" class="error" hidden></p>
+    </section>
 
-        <button id="analyze-btn" type="button">Analyze</button>
+    <!-- CREATE ROOM: Host name + topic -->
+    <section id="view-create" class="view" hidden>
+      <h1>Create a room</h1>
+      <p class="subtitle">Set a topic. Share the code or link so others can join and share their views.</p>
+
+      <div class="form-block">
+        <label for="host-name" class="label">Your name</label>
+        <input type="text" id="host-name" placeholder="Host name" class="input">
+      </div>
+      <div class="form-block">
+        <label for="room-topic" class="label">Topic / question</label>
+        <textarea id="room-topic" class="input textarea" placeholder="What should the group decide or discuss?" rows="3"></textarea>
+      </div>
+      <div class="form-actions">
+        <button id="btn-back-landing" type="button" class="btn btn-secondary">Back</button>
+        <button id="btn-do-create-room" type="button" class="btn btn-primary">Create room</button>
+      </div>
+      <p id="create-error" class="error" hidden></p>
+    </section>
+
+    <!-- ROOM CREATED: Show code + link + QR placeholder -->
+    <section id="view-room-created" class="view" hidden>
+      <h1>Room created</h1>
+      <p class="subtitle">Share this so others can join.</p>
+      <div class="share-block">
+        <div class="share-code">
+          <span class="label">Code</span>
+          <strong id="display-room-code" class="room-code">—</strong>
+          <button id="btn-copy-code" type="button" class="btn btn-small">Copy</button>
+        </div>
+        <div class="share-link">
+          <span class="label">Link</span>
+          <input type="text" id="display-join-link" readonly class="input input-readonly">
+          <button id="btn-copy-link" type="button" class="btn btn-small">Copy link</button>
+        </div>
+        <div id="qr-placeholder" class="qr-placeholder" aria-hidden="true">
+          <span class="qr-label">QR code</span>
+          <div class="qr-box">QR</div>
+        </div>
+      </div>
+      <button id="btn-enter-room-as-host" type="button" class="btn btn-primary">Enter room</button>
+    </section>
+
+    <!-- ROOM: Topic, opinions, submit, vote, analyze -->
+    <section id="view-room" class="view" hidden>
+      <header class="room-header">
+        <h1 id="room-topic-title">Topic</h1>
+        <p class="room-meta">
+          <span id="room-code-badge" class="badge">—</span>
+          <span id="room-role" class="role"></span>
+        </p>
+      </header>
+
+      <!-- Share (host only or for everyone) -->
+      <div class="share-inroom">
+        <span class="label">Invite: </span>
+        <code id="room-code-inroom">—</code>
+        <button id="btn-copy-code-inroom" type="button" class="btn btn-small">Copy code</button>
+      </div>
+
+      <!-- Submit opinion -->
+      <section class="input-section room-input">
+        <label for="opinion-text" class="label">Your opinion</label>
+        <textarea id="opinion-text" class="input textarea" placeholder="Share your view..." rows="4"></textarea>
+        <div class="image-upload-inline">
+          <label for="opinion-image" class="label-inline">Add image (optional)</label>
+          <input type="file" id="opinion-image" accept="image/*">
+        </div>
+        <div class="form-actions">
+          <button id="btn-submit-opinion" type="button" class="btn btn-primary">Submit</button>
+        </div>
+        <p id="opinion-status" class="status" aria-live="polite"></p>
+        <p id="opinion-error" class="error" hidden></p>
+      </section>
+
+      <!-- Opinions list (with votes) -->
+      <section class="opinions-section">
+        <h2>Opinions</h2>
+        <div id="opinions-list" class="opinions-list">
+          <!-- Cards rendered by renderer -->
+        </div>
+        <p id="opinions-empty" class="empty-state">No opinions yet. Share yours above.</p>
+      </section>
+
+      <!-- Host: Analyze -->
+      <div id="host-actions" class="host-actions" hidden>
+        <button id="btn-analyze" type="button" class="btn btn-primary">Analyze</button>
+      </div>
+
+      <!-- Loading state -->
+      <div id="loading" class="loading" hidden>
+        <p>Analyzing opinions...</p>
       </div>
     </section>
 
-    <!-- RESULTS SECTION (Valentina renders, Francisco wires data) -->
-    <section id="results-section" hidden>
-      <!-- Spectrum bar -->
-      <div id="spectrum"></div>
-
-      <!-- Camps -->
-      <div id="camps"></div>
-
-      <!-- Compromise -->
-      <div id="compromise"></div>
+    <!-- RESULTS (same structure as original Glia) -->
+    <section id="view-results" class="view" hidden>
+      <h1>Results</h1>
+      <div id="results-section">
+        <div id="spectrum"></div>
+        <div id="camps"></div>
+        <div id="compromise"></div>
+      </div>
+      <div class="form-actions">
+        <button id="btn-back-to-room" type="button" class="btn btn-secondary">Back to room</button>
+      </div>
     </section>
-
-    <!-- Loading state -->
-    <div id="loading" hidden>
-      <p>Analyzing opinions...</p>
-    </div>
   </main>
 
   <script type="module" src="src/main.js"></script>
