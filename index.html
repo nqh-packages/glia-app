@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Glia — Community Decision Synthesizer</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main id="app">
+    <!-- INPUT SECTION (Francisco + Valentina) -->
+    <section id="input-section">
+      <h1>Glia</h1>
+      <p class="subtitle">Paste a community discussion. Get a data-driven compromise.</p>
+
+      <div id="input-area">
+        <textarea id="text-input" placeholder="Paste WhatsApp messages, Reddit comments, or any community discussion here..."></textarea>
+
+        <div id="image-upload">
+          <label for="image-input">Or drop screenshots:</label>
+          <input type="file" id="image-input" accept="image/*" multiple>
+        </div>
+
+        <button id="analyze-btn" type="button">Analyze</button>
+      </div>
+    </section>
+
+    <!-- RESULTS SECTION (Valentina renders, Francisco wires data) -->
+    <section id="results-section" hidden>
+      <!-- Spectrum bar -->
+      <div id="spectrum"></div>
+
+      <!-- Camps -->
+      <div id="camps"></div>
+
+      <!-- Compromise -->
+      <div id="compromise"></div>
+    </section>
+
+    <!-- Loading state -->
+    <div id="loading" hidden>
+      <p>Analyzing opinions...</p>
+    </div>
+  </main>
+
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>

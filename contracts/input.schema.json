@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "GliaInput",
+  "description": "What gets sent to Gemini for analysis",
+  "type": "object",
+  "required": ["topic", "entries"],
+  "properties": {
+    "topic": {
+      "type": "string",
+      "description": "The subject being debated (e.g., '24/7 security', 'pool renovation')"
+    },
+    "entries": {
+      "type": "array",
+      "description": "Individual opinions/comments extracted from input",
+      "items": {
+        "type": "object",
+        "required": ["content", "type"],
+        "properties": {
+          "content": {
+            "type": "string",
+            "description": "The text of the opinion"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["text", "image_description"],
+            "description": "Whether this came from text input or image OCR/description"
+          },
+          "author": {
+            "type": "string",
+            "description": "Optional — anonymized identifier (Person 1, Person 2)"
+          }
+        }
+      }
+    },
+    "context": {
+      "type": "string",
+      "description": "Optional — additional context about the community or situation"
+    }
+  }
+}

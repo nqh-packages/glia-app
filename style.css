@@ -1,0 +1,84 @@
+/* Valentina: style the app here. Starter reset + layout below. */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: system-ui, -apple-system, sans-serif;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+  color: #1a1a1a;
+  background: #fafafa;
+}
+
+h1 {
+  font-size: 2.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.subtitle {
+  color: #666;
+  margin-bottom: 2rem;
+}
+
+/* Input area */
+#text-input {
+  width: 100%;
+  min-height: 200px;
+  padding: 1rem;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  resize: vertical;
+}
+
+#image-upload {
+  margin: 1rem 0;
+}
+
+#analyze-btn {
+  padding: 0.75rem 2rem;
+  font-size: 1rem;
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+#analyze-btn:hover {
+  background: #1d4ed8;
+}
+
+/* Results — Valentina styles these */
+#results-section {
+  margin-top: 2rem;
+}
+
+#spectrum {
+  margin-bottom: 2rem;
+}
+
+#camps {
+  display: grid;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+#compromise {
+  padding: 1.5rem;
+  background: #f0fdf4;
+  border-radius: 8px;
+  border: 1px solid #bbf7d0;
+}
+
+/* Loading */
+#loading {
+  text-align: center;
+  padding: 2rem;
+  color: #666;
+}

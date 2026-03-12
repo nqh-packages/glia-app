@@ -1,0 +1,66 @@
+{
+  "_comment": "Example of a complete Gemini response — use this to build the UI against",
+
+  "topic": "24/7 Security Guard",
+  "total_opinions": 23,
+
+  "camps": [
+    {
+      "label": "Pro-Security",
+      "position": "Want 24/7 security guards in the building",
+      "supporter_count": 14,
+      "reasons": [
+        "Recent break-in on floor 3",
+        "Packages getting stolen from lobby",
+        "Feel unsafe at night"
+      ],
+      "sentiment": "strongly_for",
+      "representative_quotes": [
+        "My apartment was broken into last month. We NEED security.",
+        "I've had 3 packages stolen this year alone."
+      ]
+    },
+    {
+      "label": "Cost-Conscious",
+      "position": "Oppose additional security fees",
+      "supporter_count": 9,
+      "reasons": [
+        "Monthly fees already too high",
+        "Current camera system is sufficient",
+        "Guard won't prevent determined criminals"
+      ],
+      "sentiment": "against",
+      "representative_quotes": [
+        "We already pay 300/month. Adding a guard would double it.",
+        "Cameras work fine. A guard is just theater."
+      ]
+    }
+  ],
+
+  "spectrum": {
+    "for_percentage": 61,
+    "against_percentage": 39,
+    "neutral_percentage": 0,
+    "key_themes": [
+      { "theme": "Safety concerns", "mention_count": 12 },
+      { "theme": "Cost / monthly fees", "mention_count": 8 },
+      { "theme": "Package theft", "mention_count": 6 },
+      { "theme": "Current system adequacy", "mention_count": 5 }
+    ]
+  },
+
+  "compromise": {
+    "summary": "Night-shift security guard (10pm-6am) with cost split proportional to apartment size.",
+    "details": "Hire one security guard for night shift only (10pm-6am), when most safety incidents occur. Cost distributed proportionally by apartment square meters — larger units pay more, studios pay less. Upgrade camera system for daytime coverage. Trial period of 3 months with resident vote to continue.",
+    "addresses": [
+      {
+        "camp": "Pro-Security",
+        "how_addressed": "Night coverage addresses the primary safety window. Package theft is mitigated by upgraded cameras during day."
+      },
+      {
+        "camp": "Cost-Conscious",
+        "how_addressed": "Night-only halves the cost vs 24/7. Proportional split means smaller apartments pay less. 3-month trial means it's reversible."
+      }
+    ]
+  }
+}

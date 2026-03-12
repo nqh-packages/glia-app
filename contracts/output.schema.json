@@ -1,0 +1,113 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "GliaOutput",
+  "description": "What Gemini returns — the UI renders this directly",
+  "type": "object",
+  "required": ["topic", "camps", "spectrum", "compromise"],
+  "properties": {
+    "topic": {
+      "type": "string",
+      "description": "The identified topic of debate"
+    },
+    "total_opinions": {
+      "type": "integer",
+      "description": "Total number of distinct opinions analyzed"
+    },
+    "camps": {
+      "type": "array",
+      "description": "The identified opinion groups (usually 2-3)",
+      "items": {
+        "type": "object",
+        "required": ["label", "position", "supporter_count", "reasons", "sentiment"],
+        "properties": {
+          "label": {
+            "type": "string",
+            "description": "Short camp name (e.g., 'Pro-Security', 'Cost-Conscious')"
+          },
+          "position": {
+            "type": "string",
+            "description": "One-sentence summary of what this camp wants"
+          },
+          "supporter_count": {
+            "type": "integer",
+            "description": "Estimated number of people in this camp"
+          },
+          "reasons": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Key reasons this camp holds their position"
+          },
+          "sentiment": {
+            "type": "string",
+            "enum": ["strongly_for", "for", "neutral", "against", "strongly_against"],
+            "description": "Overall sentiment intensity of this camp"
+          },
+          "representative_quotes": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "1-2 actual quotes from the input that represent this camp"
+          }
+        }
+      }
+    },
+    "spectrum": {
+      "type": "object",
+      "description": "Sentiment distribution for the visual spectrum bar",
+      "required": ["for_percentage", "against_percentage", "key_themes"],
+      "properties": {
+        "for_percentage": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "against_percentage": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "neutral_percentage": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "key_themes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "theme": { "type": "string" },
+              "mention_count": { "type": "integer" }
+            }
+          },
+          "description": "Most mentioned themes across all opinions"
+        }
+      }
+    },
+    "compromise": {
+      "type": "object",
+      "description": "The AI-generated middle ground",
+      "required": ["summary", "details", "addresses"],
+      "properties": {
+        "summary": {
+          "type": "string",
+          "description": "One-sentence compromise proposal"
+        },
+        "details": {
+          "type": "string",
+          "description": "1-2 paragraph explanation of the compromise"
+        },
+        "addresses": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "camp": { "type": "string" },
+              "how_addressed": { "type": "string" }
+            }
+          },
+          "description": "How this compromise addresses each camp's concerns"
+        }
+      }
+    }
+  }
+}
