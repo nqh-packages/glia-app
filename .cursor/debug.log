@@ -1,40 +1,13 @@
-{"location":"main.js:init","message":"script run","data":{"appExists":true,"viewCount":5},"timestamp":1773356268065,"hypothesisId":"H1"}
-{"location":"main.js:setView","message":"setView called","data":{"viewId":"landing","appExists":true},"timestamp":1773356268066,"hypothesisId":"H1","runId":"post-fix"}
-{"location":"main.js:setView","message":"setView called","data":{"viewId":"create","appExists":true},"timestamp":1773356273388,"hypothesisId":"H1","runId":"post-fix"}
-{"location":"main.js:setView","message":"setView called","data":{"viewId":"landing","appExists":true},"timestamp":1773356275667,"hypothesisId":"H1","runId":"post-fix"}
-{"location":"main.js:setView","message":"setView called","data":{"viewId":"create","appExists":true},"timestamp":1773356278898,"hypothesisId":"H1","runId":"post-fix"}
-{"location":"main.js:setView","message":"setView called","data":{"viewId":"room-created","appExists":true},"timestamp":1773356293462,"hypothesisId":"H1","runId":"post-fix"}
-{"location":"main.js:setView","message":"setView called","data":{"viewId":"room","appExists":true},"timestamp":1773356300453,"hypothesisId":"H1","runId":"post-fix"}
-{"location":"main.js:init","message":"script run","data":{"appExists":true,"viewCount":5},"timestamp":1773356394852,"hypothesisId":"H1"}
-{"location":"main.js:setView","message":"setView called","data":{"viewId":"landing","appExists":true},"timestamp":1773356394853,"hypothesisId":"H1","runId":"post-fix"}
-{"location":"main.js:setView","message":"setView called","data":{"viewId":"create","appExists":true},"timestamp":1773356575587,"hypothesisId":"H1","runId":"post-fix"}
-{"location":"main.js:setView","message":"setView called","data":{"viewId":"room-created","appExists":true},"timestamp":1773356586156,"hypothesisId":"H1","runId":"post-fix"}
-{"location":"main.js:setView","message":"setView called","data":{"viewId":"room","appExists":true},"timestamp":1773356613142,"hypothesisId":"H1","runId":"post-fix"}
-{"location":"main.js:init","message":"script run","data":{"appExists":true,"viewCount":5},"timestamp":1773357301786,"hypothesisId":"H1"}
-{"location":"main.js:setView","message":"setView called","data":{"viewId":"landing","appExists":true},"timestamp":1773357301787,"hypothesisId":"H1","runId":"post-fix"}
-{"location":"main.js:init","message":"script run","data":{"appExists":true,"viewCount":5},"timestamp":1773357303135,"hypothesisId":"H1"}
-{"location":"main.js:setView","message":"setView called","data":{"viewId":"landing","appExists":true},"timestamp":1773357303136,"hypothesisId":"H1","runId":"post-fix"}
-{"location":"main.js:setView","message":"setView called","data":{"viewId":"create","appExists":true},"timestamp":1773357305129,"hypothesisId":"H1","runId":"post-fix"}
-{"location":"main.js:setView","message":"setView called","data":{"viewId":"room-created","appExists":true},"timestamp":1773357314634,"hypothesisId":"H1","runId":"post-fix"}
-{"location":"main.js:setView","message":"setView called","data":{"viewId":"room","appExists":true},"timestamp":1773357317797,"hypothesisId":"H1","runId":"post-fix"}
-{"location":"main.js:init","message":"script run","data":{"appExists":true,"viewCount":5},"timestamp":1773357368407,"hypothesisId":"H1"}
-{"location":"main.js:setView","message":"setView called","data":{"viewId":"landing","appExists":true},"timestamp":1773357368408,"hypothesisId":"H1","runId":"post-fix"}
-{"location":"main.js:setView","message":"setView called","data":{"viewId":"create","appExists":true},"timestamp":1773357370944,"hypothesisId":"H1","runId":"post-fix"}
-{"location":"main.js:setView","message":"setView called","data":{"viewId":"room-created","appExists":true},"timestamp":1773357386188,"hypothesisId":"H1","runId":"post-fix"}
-{"location":"main.js:setView","message":"setView called","data":{"viewId":"room","appExists":true},"timestamp":1773357391154,"hypothesisId":"H1","runId":"post-fix"}
-{"location":"main.js:setView","message":"setView called","data":{"viewId":"results","appExists":true},"timestamp":1773357408457,"hypothesisId":"H1","runId":"post-fix"}
-{"location":"main.js:setView","message":"setView called","data":{"viewId":"room","appExists":true},"timestamp":1773357424188,"hypothesisId":"H1","runId":"post-fix"}
-{"location":"main.js:setView","message":"setView called","data":{"viewId":"results","appExists":true},"timestamp":1773357430676,"hypothesisId":"H1","runId":"post-fix"}
-{"location":"main.js:setView","message":"setView called","data":{"viewId":"room","appExists":true},"timestamp":1773357462518,"hypothesisId":"H1","runId":"post-fix"}
-{"location":"main.js:setView","message":"setView called","data":{"viewId":"results","appExists":true},"timestamp":1773357465267,"hypothesisId":"H1","runId":"post-fix"}
-{"location":"main.js:setView","message":"setView called","data":{"viewId":"room","appExists":true},"timestamp":1773357482329,"hypothesisId":"H1","runId":"post-fix"}
-{"location":"main.js:init","message":"script run","data":{"appExists":true,"viewCount":5},"timestamp":1773357673678,"hypothesisId":"H1"}
-{"location":"main.js:setView","message":"setView called","data":{"viewId":"landing","appExists":true},"timestamp":1773357673679,"hypothesisId":"H1","runId":"post-fix"}
-{"location":"main.js:setView","message":"setView called","data":{"viewId":"create","appExists":true},"timestamp":1773357675432,"hypothesisId":"H1","runId":"post-fix"}
-{"location":"main.js:setView","message":"setView called","data":{"viewId":"room-created","appExists":true},"timestamp":1773357698202,"hypothesisId":"H1","runId":"post-fix"}
-{"location":"main.js:setView","message":"setView called","data":{"viewId":"room","appExists":true},"timestamp":1773357702508,"hypothesisId":"H1","runId":"post-fix"}
-{"location":"main.js:init","message":"script run","data":{"appExists":true,"viewCount":5},"timestamp":1773357721557,"hypothesisId":"H1"}
-{"location":"main.js:setView","message":"setView called","data":{"viewId":"landing","appExists":true},"timestamp":1773357721557,"hypothesisId":"H1","runId":"post-fix"}
-{"location":"main.js:setView","message":"setView called","data":{"viewId":"create","appExists":true},"timestamp":1773357737655,"hypothesisId":"H1","runId":"post-fix"}
-{"location":"main.js:setView","message":"setView called","data":{"viewId":"room-created","appExists":true},"timestamp":1773357748061,"hypothesisId":"H1","runId":"post-fix"}
-{"location":"main.js:setView","message":"setView called","data":{"viewId":"room","appExists":true},"timestamp":1773357770950,"hypothesisId":"H1","runId":"post-fix"}
+{"location":"index.html:inline","message":"inline bootstrap","data":{"protocol":"http:","appExists":true,"moduleScriptCount":1},"timestamp":1773359029763,"hypothesisId":"H2"}
+{"location":"src/main.js:init","message":"module init","data":{"appExists":true,"loadingExists":true,"href":"http://localhost:5173/"},"timestamp":1773359029795,"hypothesisId":"H1"}
+{"location":"src/main.js:setView","message":"setView called","data":{"viewId":"landing","appExists":true},"timestamp":1773359029796,"hypothesisId":"H1"}
+{"location":"src/main.js:restoreExistingSession","message":"restore session start","data":{"hasSession":false,"hasRoomId":false,"hasJoinToken":false},"timestamp":1773359029797,"hypothesisId":"H3"}
+{"location":"index.html:inline","message":"inline bootstrap","data":{"protocol":"http:","appExists":true,"moduleScriptCount":1},"timestamp":1773359040309,"hypothesisId":"H2"}
+{"location":"src/main.js:init","message":"module init","data":{"appExists":true,"loadingExists":true,"href":"http://localhost:5173/"},"timestamp":1773359040336,"hypothesisId":"H1"}
+{"location":"src/main.js:setView","message":"setView called","data":{"viewId":"landing","appExists":true},"timestamp":1773359040337,"hypothesisId":"H1"}
+{"location":"src/main.js:restoreExistingSession","message":"restore session start","data":{"hasSession":false,"hasRoomId":false,"hasJoinToken":false},"timestamp":1773359040338,"hypothesisId":"H3"}
+{"location":"src/main.js:setView","message":"setView called","data":{"viewId":"create","appExists":true},"timestamp":1773359042043,"hypothesisId":"H1"}
+{"location":"src/main.js:createRoom","message":"create room start","data":{"hasHostName":true,"topicLength":3},"timestamp":1773359051153,"hypothesisId":"H5"}
+{"location":"src/main.js:getAppConfig","message":"config resolved","data":{"hasLocalConfig":true,"localConfigUrlLength":45,"hasGlobalConfig":false,"globalConfigUrlLength":0,"hasEnvUrl":false,"envUrlLength":0},"timestamp":1773359051176,"hypothesisId":"H4"}
+{"location":"src/main.js:getConvexClient","message":"convex url check","data":{"hasConfig":true,"hasConvexUrl":true,"urlLength":45,"isPlaceholder":false},"timestamp":1773359051177,"hypothesisId":"H4"}
+{"location":"src/main.js:createRoom","message":"create room failed","data":{"errorMessage":"Failed to fetch"},"timestamp":1773359051342,"hypothesisId":"H5"}

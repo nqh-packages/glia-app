@@ -1,0 +1,1 @@
+var e={convexUrl:`https://hearty-crow-678.eu-west1.convex.cloud`};export{e as APP_CONFIG};
