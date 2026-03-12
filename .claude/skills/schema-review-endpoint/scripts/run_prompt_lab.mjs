@@ -32,6 +32,8 @@ const SCENARIOS = {
     topic: "Should the building hire an overnight security guard?",
     description: "Residents are deciding whether to add overnight staffing after recent safety incidents.",
     mix: { yes: 0.45, neutral: 0.1, no: 0.45 },
+    reactionRate: 0.78,
+    reactionReasonRate: 0.42,
     reasonPools: {
       yes: [
         "Recent thefts make the building feel unsafe after dark.",
@@ -54,6 +56,8 @@ const SCENARIOS = {
     topic: "Should the building convert the unused lobby room into a package room?",
     description: "Management wants a resident vote on using spare lobby space for secure package storage.",
     mix: { yes: 0.7, neutral: 0.2, no: 0.1 },
+    reactionRate: 0.64,
+    reactionReasonRate: 0.34,
     reasonPools: {
       yes: [
         "A package room would solve missed deliveries and clutter in the lobby.",
@@ -76,6 +80,8 @@ const SCENARIOS = {
     topic: "Should the neighborhood close the main street to cars on weekends?",
     description: "The district is considering a weekend pedestrian zone for markets, families, and local businesses.",
     mix: { yes: 0.35, neutral: 0.35, no: 0.3 },
+    reactionRate: 0.72,
+    reactionReasonRate: 0.38,
     reasonPools: {
       yes: [
         "A pedestrian zone would make the area safer and more welcoming for families.",
@@ -93,8 +99,82 @@ const SCENARIOS = {
         "This could be disruptive if transit alternatives are not improved first."
       ]
     }
+  },
+  dogpile: {
+    topic: "Should the company require everyone to return to the office four days a week?",
+    description: "Leadership wants a strict in-office policy, and the discussion is emotionally charged.",
+    mix: { yes: 0.2, neutral: 0.1, no: 0.7 },
+    reactionRate: 0.9,
+    reactionReasonRate: 0.58,
+    reasonPools: {
+      yes: [
+        "More in-person time would speed up collaboration and unblock decisions.",
+        "Junior teammates learn faster when people are physically together.",
+        "A stronger office culture could improve accountability and execution."
+      ],
+      neutral: [
+        "A department-by-department policy might make more sense than one fixed rule.",
+        "I want more collaboration, but commuting burdens need to be considered.",
+        "A trial with exemptions could test whether the policy actually improves output."
+      ],
+      no: [
+        "This would punish teams that already perform well remotely.",
+        "The commute cost in time and money outweighs the collaboration gains.",
+        "A blanket policy ignores caregivers, disabled staff, and distributed hiring."
+      ]
+    }
+  },
+  bridgeable: {
+    topic: "Should the school move to a later start time?",
+    description: "Parents, students, and teachers are discussing a schedule shift to improve sleep and learning outcomes.",
+    mix: { yes: 0.4, neutral: 0.4, no: 0.2 },
+    reactionRate: 0.7,
+    reactionReasonRate: 0.46,
+    reasonPools: {
+      yes: [
+        "Students would be more alert and ready to learn later in the morning.",
+        "A later start could improve attendance and reduce burnout.",
+        "The current schedule is out of sync with adolescent sleep patterns."
+      ],
+      neutral: [
+        "I support the goal, but transport and after-school timing need a real plan.",
+        "A phased rollout would help the district adapt without chaos.",
+        "This could work if sports, childcare, and bus routes are redesigned together."
+      ],
+      no: [
+        "A later start would push extracurriculars too late into the evening.",
+        "Families depend on the current schedule for work and childcare routines.",
+        "Changing the whole system may create more disruption than benefit."
+      ]
+    }
+  },
+  sparse: {
+    topic: "Should the town allow food trucks in the central plaza?",
+    description: "The proposal has limited engagement so far and only a few reactions.",
+    mix: { yes: 0.5, neutral: 0.25, no: 0.25 },
+    reactionRate: 0.34,
+    reactionReasonRate: 0.18,
+    reasonPools: {
+      yes: [
+        "Food trucks would bring energy and variety to the plaza.",
+        "This could attract more visitors without permanent construction.",
+        "Small vendors would get a lower-cost way to reach customers."
+      ],
+      neutral: [
+        "I want to see rules on noise, hours, and waste before deciding.",
+        "A permit cap could make the idea workable.",
+        "This seems promising, but cleanup and crowd flow need planning."
+      ],
+      no: [
+        "Existing restaurants may see this as unfair competition.",
+        "The plaza could become noisy and cluttered on busy weekends.",
+        "Without strict rules, this may create litter and traffic problems."
+      ]
+    }
   }
 };
+
+const SCENARIO_NAMES = Object.keys(SCENARIOS);
 
 function parseArgs(argv) {
   const options = {
@@ -140,9 +220,9 @@ function parseArgs(argv) {
     }
   }
 
-  if (!SCENARIOS[options.scenario]) {
+  if (options.scenario !== "all" && !SCENARIOS[options.scenario]) {
     throw new Error(
-      `Unknown scenario "${options.scenario}". Use one of: ${Object.keys(SCENARIOS).join(", ")}`
+      `Unknown scenario "${options.scenario}". Use one of: ${["all", ...SCENARIO_NAMES].join(", ")}`
     );
   }
 
@@ -158,7 +238,7 @@ function printHelp() {
   node .claude/skills/schema-review-endpoint/scripts/run_prompt_lab.mjs [options]
 
 Options:
-  --scenario polarized|consensus|nuanced
+  --scenario ${["all", ...SCENARIO_NAMES].join("|")}
   --participants <count>   Total participants including host. Default: 8
   --seed <value>           Deterministic seed string. Default: glia-prompt-lab
   --timeout-ms <ms>        Max wait for analysis. Default: 90000
@@ -334,7 +414,7 @@ function generateCase(options) {
         continue;
       }
 
-      if (random() > 0.72) {
+      if (random() > (scenario.reactionRate ?? 0.72)) {
         continue;
       }
 
@@ -349,7 +429,7 @@ function generateCase(options) {
         targetIndex,
         kind,
         reason:
-          random() > 0.65
+          random() < (scenario.reactionReasonRate ?? 0.35)
             ? buildReactionReason(random, kind, participants[targetIndex].choice)
             : undefined
       });
@@ -501,23 +581,40 @@ function buildSummary(run) {
 async function main() {
   const options = parseArgs(process.argv.slice(2));
   const { client } = await loadClient(options.envFile);
-  const generated = generateCase(options);
-  const run = await seedAndAnalyze(client, generated, options);
+  const scenariosToRun = options.scenario === "all" ? SCENARIO_NAMES : [options.scenario];
+  const results = [];
 
-  const payload = {
-    scenario: options.scenario,
-    seed: options.seed,
-    generated,
-    run,
-    summary: buildSummary(run)
-  };
+  for (const scenarioName of scenariosToRun) {
+    const scenarioOptions = { ...options, scenario: scenarioName };
+    const generated = generateCase(scenarioOptions);
+    const run = await seedAndAnalyze(client, generated, scenarioOptions);
 
-  if (options.output) {
-    await fs.mkdir(path.dirname(options.output), { recursive: true });
-    await fs.writeFile(options.output, `${JSON.stringify(payload, null, 2)}\n`, "utf8");
+    const payload = {
+      scenario: scenarioName,
+      seed: options.seed,
+      generated,
+      run,
+      summary: buildSummary(run)
+    };
+
+    if (options.output) {
+      if (options.scenario === "all") {
+        await fs.mkdir(options.output, { recursive: true });
+        await fs.writeFile(
+          path.join(options.output, `${scenarioName}.json`),
+          `${JSON.stringify(payload, null, 2)}\n`,
+          "utf8"
+        );
+      } else {
+        await fs.mkdir(path.dirname(options.output), { recursive: true });
+        await fs.writeFile(options.output, `${JSON.stringify(payload, null, 2)}\n`, "utf8");
+      }
+    }
+
+    results.push(payload);
   }
 
-  console.log(JSON.stringify(payload, null, 2));
+  console.log(JSON.stringify(options.scenario === "all" ? results : results[0], null, 2));
 }
 
 main().catch((error) => {

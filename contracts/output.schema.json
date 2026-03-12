@@ -3,7 +3,7 @@
   "title": "GliaOutput",
   "description": "What Gemini returns for a shared discussion room",
   "type": "object",
-  "required": ["topic", "responses", "camps", "spectrum", "compromise"],
+  "required": ["topic", "total_responses", "responses", "camps", "spectrum", "compromise"],
   "properties": {
     "topic": {
       "type": "string",
@@ -37,17 +37,22 @@
             "description": "The participant's declared answer to the host statement"
           },
           "support_score": {
-            "type": "number",
-            "description": "AI-estimated support weight informed by votes and content"
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100,
+            "description": "AI-estimated support score on a 0-100 scale informed by the response content and secondary reactions"
           },
           "yes_count": {
-            "type": "integer"
+            "type": "integer",
+            "description": "Number of participants who reacted yes to this specific response"
           },
           "neutral_count": {
-            "type": "integer"
+            "type": "integer",
+            "description": "Number of participants who reacted neutral to this specific response"
           },
           "no_count": {
-            "type": "integer"
+            "type": "integer",
+            "description": "Number of participants who reacted no to this specific response"
           }
         }
       }
@@ -57,7 +62,7 @@
       "description": "The identified response groups (usually 2-3)",
       "items": {
         "type": "object",
-        "required": ["label", "position", "supporter_count", "reasons", "sentiment"],
+        "required": ["label", "position", "supporter_count", "reasons", "sentiment", "representative_quotes"],
         "properties": {
           "label": {
             "type": "string",
@@ -114,8 +119,14 @@
           "items": {
             "type": "object",
             "properties": {
-              "theme": { "type": "string" },
-              "mention_count": { "type": "integer" }
+              "theme": {
+                "type": "string",
+                "description": "Recurring topic or concern raised across participant responses"
+              },
+              "mention_count": {
+                "type": "integer",
+                "description": "Approximate number of responses that mention the theme"
+              }
             }
           },
           "description": "Most mentioned themes across all responses"
@@ -140,8 +151,14 @@
           "items": {
             "type": "object",
             "properties": {
-              "camp": { "type": "string" },
-              "how_addressed": { "type": "string" }
+              "camp": {
+                "type": "string",
+                "description": "Camp label from the camps array that this compromise point addresses"
+              },
+              "how_addressed": {
+                "type": "string",
+                "description": "Concrete way the compromise addresses that camp's needs or objections"
+              }
             }
           },
           "description": "How this compromise addresses each camp's concerns"

@@ -7,6 +7,7 @@ import { v } from "convex/values";
 import {
   ANALYSIS_MODEL,
   clampPercentage,
+  clampSupportScore,
   getAnalysisSnapshotRef,
   saveAnalysisResultRef,
   toBase64
@@ -27,13 +28,15 @@ Return only valid JSON.
 Requirements:
 1. Do not change a participant's declared choice. Use it as the source of truth for whether they answered yes, neutral, or no to the main statement.
 2. Summarize each response briefly.
-3. Identify 2-4 response camps when meaningful.
-4. Explain each camp's position and key reasons.
-5. Use secondary reaction signals as support weighting, not as ground truth.
-6. Produce a yes / neutral / no spectrum and key themes.
-7. Propose a practical compromise grounded in what participants actually said.
-8. Keep names anonymized as "Participant 1", "Participant 2", etc.
-9. If there is not enough information, still return the best structured answer you can.
+3. Assign every response an integer support_score from 0 to 100.
+4. support_score means how much support or resonance that response appears to have after considering the response itself plus secondary reaction signals. 0 means almost no support, 50 means mixed or unclear support, and 100 means the strongest support in the room.
+5. Identify 2-4 response camps when meaningful.
+6. Explain each camp's position and key reasons.
+7. Use secondary reaction signals as support weighting, not as ground truth.
+8. Produce a yes / neutral / no spectrum and key themes.
+9. Propose a practical compromise grounded in what participants actually said.
+10. Keep names anonymized as "Participant 1", "Participant 2", etc.
+11. If there is not enough information, still return the best structured answer you can.
 
 Return this shape exactly:
 {
@@ -162,7 +165,7 @@ function validateAnalysisOutput(payload: any) {
       participant: String(response.participant ?? ""),
       summary: String(response.summary ?? ""),
       choice: normalizeResponseChoice(response.choice),
-      support_score: Number(response.support_score ?? 0),
+      support_score: clampSupportScore(Number(response.support_score ?? 0)),
       yes_count: Number(response.yes_count ?? 0),
       neutral_count: Number(response.neutral_count ?? 0),
       no_count: Number(response.no_count ?? 0)

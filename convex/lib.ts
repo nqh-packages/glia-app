@@ -3,13 +3,14 @@ import { makeFunctionReference } from "convex/server";
 const CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 const TOKEN_ALPHABET = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
-export const ANALYSIS_MODEL = "gemini-2.5-flash";
-export const PROMPT_VERSION = "glia-shared-room-v1";
+export const ANALYSIS_MODEL = "gemini-3-flash-preview";
+export const PROMPT_VERSION = "glia-shared-room-v2";
 
 export const runAnalysisRef = makeFunctionReference<"action">("analysisAction:runAnalysis");
 export const getAnalysisSnapshotRef = makeFunctionReference<"query">("rooms:getAnalysisSnapshot");
 export const startAnalysisRunRef = makeFunctionReference<"mutation">("analyses:startAnalysisRun");
 export const saveAnalysisResultRef = makeFunctionReference<"mutation">("analyses:saveAnalysisResult");
+export const getRoomByCodeRef = makeFunctionReference<"query">("rooms:getRoomByCode");
 
 export function now() {
   return Date.now();
@@ -41,4 +42,8 @@ export function toBase64(bytes: Uint8Array) {
 
 export function clampPercentage(value: number) {
   return Math.max(0, Math.min(100, value));
+}
+
+export function clampSupportScore(value: number) {
+  return Math.round(Math.max(0, Math.min(100, value)));
 }

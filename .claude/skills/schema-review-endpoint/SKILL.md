@@ -24,6 +24,10 @@ python3 .claude/skills/schema-review-endpoint/scripts/review_schema.py contracts
 node .claude/skills/schema-review-endpoint/scripts/run_prompt_lab.mjs --scenario polarized --participants 8
 ```
 
+```bash
+node .claude/skills/schema-review-endpoint/scripts/run_prompt_lab.mjs --scenario all --participants 8 --output tmp/prompt-lab
+```
+
 ## Scenario Presets
 
 | Preset | Shape | Best for |
@@ -31,6 +35,10 @@ node .claude/skills/schema-review-endpoint/scripts/run_prompt_lab.mjs --scenario
 | `polarized` | yes/no split with little middle ground | camp separation, compromise quality |
 | `consensus` | strong majority with light opposition | over-clustering, support weighting |
 | `nuanced` | heavy neutral context and mixed trade-offs | nuanced synthesis, spectrum balance |
+| `dogpile` | strong majority pressure and high reaction volume | popularity effects, compromise under hostility |
+| `bridgeable` | strong neutral center and conditional support | middle-ground quality, trial proposals |
+| `sparse` | low-engagement room with limited reactions | low-signal robustness |
+| `all` | runs every preset sequentially | regression sweeps after prompt edits |
 
 ## Current Schema Model
 

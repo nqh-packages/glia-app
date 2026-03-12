@@ -15,6 +15,7 @@ import type * as lib from "../lib.js";
 import type * as opinions from "../opinions.js";
 import type * as rooms from "../rooms.js";
 import type * as schemaReview from "../schemaReview.js";
+import type * as shareAction from "../shareAction.js";
 import type * as votes from "../votes.js";
 
 import type {
@@ -31,6 +32,7 @@ declare const fullApi: ApiFromModules<{
   opinions: typeof opinions;
   rooms: typeof rooms;
   schemaReview: typeof schemaReview;
+  shareAction: typeof shareAction;
   votes: typeof votes;
 }>;
 
