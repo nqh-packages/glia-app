@@ -1,0 +1,37 @@
+{
+  "name": "glia-app",
+  "version": "1.0.0",
+  "description": "Glia shared discussion room app",
+  "main": "src/main.js",
+  "scripts": {
+    "build": "vite build",
+    "convex:dev": "npx convex dev",
+    "dev": "vite",
+    "preview": "vite preview",
+    "prepare": "bash ./scripts/install-hooks.sh",
+    "setup-hooks": "bash ./scripts/install-hooks.sh",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nqh-packages/glia-app.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/nqh-packages/glia-app/issues"
+  },
+  "homepage": "https://github.com/nqh-packages/glia-app#readme",
+  "dependencies": {
+    "@google/genai": "^1.45.0",
+    "convex": "^1.33.0",
+    "qrcode": "^1.5.4"
+  },
+  "devDependencies": {
+    "@types/node": "^25.5.0",
+    "typescript": "^5.9.3",
+    "vite": "^8.0.0"
+  }
+}

@@ -22,10 +22,13 @@ Core outputs:
 - A room starts with a host-created topic / initial statement.
 - Join methods: short code, share link, QR code.
 - Participants enter a display name to join.
-- One opinion per participant.
+- Each top-level comment is treated as an opinion for AI analysis.
+- A participant should prefer reacting to an existing comment instead of repeating the same reasoning.
 - Opinions may include optional image attachments.
-- Voting happens before analysis.
-- Votes are up/down with optional reason text.
+- Reactions happen before analysis.
+- Reaction options are `yes`, `neutral`, and `no`.
+- Optional text reasoning appears only after a reaction is chosen.
+- Neutral is not agreement or disagreement. It means "I have context / nuance / a suggestion."
 - Analysis modes in v1:
   - `manual`: host clicks Analyze
   - `autoCount`: analyze when opinion count reaches threshold
@@ -34,7 +37,7 @@ Core outputs:
   - `limited`: host sets max participants/opinions
   - `unlimited`: no cap
 - Browser persistence via cookie/localStorage is acceptable for hackathon scope.
-- AI decides sentiment/categorization from comments + vote signals. The app only collects structured inputs.
+- AI decides sentiment/categorization from comments + reaction signals. The app only collects structured inputs.
 
 ---
 
@@ -50,7 +53,7 @@ Convex stores room + host token + short code
 Participants join by code / link / QR
   |
   v
-Convex stores participants + opinions + votes + attachments
+Convex stores participants + opinions + reactions + attachments
   |
   v
 Host/manual trigger OR auto trigger (count / timer)
@@ -140,15 +143,16 @@ This is no longer a frontend-only app. Backend state lives in Convex. Gemini run
 - `participantId`
 - `text`
 - `attachmentIds`
-- `upvoteCount`
-- `downvoteCount`
+- `yesCount`
+- `neutralCount`
+- `noCount`
 - timestamps
 
-### `votes`
+### `reactions`
 - `roomId`
 - `opinionId`
 - `participantId`
-- `value`: `1 | -1`
+- `kind`: `yes | neutral | no`
 - `reason` optional
 - timestamps
 - unique per participant/opinion pair
@@ -185,10 +189,10 @@ This is no longer a frontend-only app. Backend state lives in Convex. Gemini run
 - `updateOpinion({ roomId, joinToken, text, attachmentIds })` if editing before analysis is allowed
 - `listOpinions({ roomId })`
 
-### Voting
-- `castVote({ roomId, joinToken, opinionId, value, reason? })`
-- `removeVote({ roomId, joinToken, opinionId })` optional
-- `listVotesForRoom({ roomId })`
+### Reactions
+- `castReaction({ roomId, joinToken, opinionId, kind, reason? })`
+- `removeReaction({ roomId, joinToken, opinionId })` optional
+- `listReactionsForRoom({ roomId })`
 
 ### Analysis
 - `requestAnalysis({ roomId, hostToken })`
@@ -206,8 +210,8 @@ Input contract must cover:
 - room topic / initial statement
 - participant opinions
 - optional image attachments
-- vote totals per opinion
-- optional vote reasons
+- reaction totals per opinion
+- optional reaction reasons
 - room metadata needed for analysis mode / language
 
 Output contract must cover:
@@ -216,7 +220,7 @@ Output contract must cover:
 - spectrum
 - key themes
 - compromise
-- support signal informed by votes
+- support signal informed by reactions
 
 Gemini output must be validated before saving.
 
@@ -229,7 +233,7 @@ Gemini output must be validated before saving.
 - Use current Gemini SDK/model guidance, not legacy client-side direct fetches.
 - Store `model` and `promptVersion` on every analysis.
 - Anonymize participants in model input when possible.
-- Votes are weighting signals, not hard truth labels.
+- Reactions are weighting signals, not hard truth labels.
 - If analysis fails or returns invalid JSON, store error state and keep room usable.
 
 ---
@@ -253,7 +257,8 @@ Gemini output must be validated before saving.
 - Host can close room manually.
 - Analysis can be re-run manually after new input if room remains open.
 - Auto-analysis must debounce to avoid repeated Gemini calls.
-- Duplicate votes from one participant on one opinion are not allowed.
+- Duplicate reactions from one participant on one opinion are not allowed.
+- Frontend implementation of the reaction controls belongs to Francisco + Valentina. Backend work should only document and support the behavior.
 
 ---
 
@@ -287,6 +292,11 @@ npm run build
 # Deploy Convex
 npx convex deploy
 ```
+
+Hook install directive:
+- `npm install` automatically installs the tracked pre-commit hook via the repo `prepare` script.
+- If hooks stop working after pulling, run `npm run setup-hooks`.
+- The pre-commit hook syncs `CLAUDE.md` and `AGENTS.md`; whichever file was updated most recently wins, then `AGENTS.md` is restored as a symlink to `CLAUDE.md`.
 
 If the frontend stays framework-light, keep the setup minimal. Do not add unnecessary infrastructure.
 

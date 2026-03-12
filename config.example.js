@@ -1,4 +1,6 @@
-// Copy this to config.js and add your Gemini API key
-// config.js is gitignored — never commit your real key
+// Browser config should stay non-secret.
+// Gemini now runs server-side in Convex, so do not put API keys here.
 
-export const GEMINI_API_KEY = 'your-gemini-api-key-here';
+export const APP_CONFIG = {
+  convexUrl: 'https://your-convex-deployment.convex.cloud'
+};

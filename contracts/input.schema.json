@@ -1,40 +1,89 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "GliaInput",
-  "description": "What gets sent to Gemini for analysis",
+  "description": "Structured room snapshot sent to Gemini for shared discussion analysis",
   "type": "object",
-  "required": ["topic", "entries"],
+  "required": ["room", "opinions"],
   "properties": {
-    "topic": {
-      "type": "string",
-      "description": "The subject being debated (e.g., '24/7 security', 'pool renovation')"
-    },
-    "entries": {
-      "type": "array",
-      "description": "Individual opinions/comments extracted from input",
-      "items": {
-        "type": "object",
-        "required": ["content", "type"],
-        "properties": {
-          "content": {
-            "type": "string",
-            "description": "The text of the opinion"
-          },
-          "type": {
-            "type": "string",
-            "enum": ["text", "image_description"],
-            "description": "Whether this came from text input or image OCR/description"
-          },
-          "author": {
-            "type": "string",
-            "description": "Optional — anonymized identifier (Person 1, Person 2)"
-          }
+    "room": {
+      "type": "object",
+      "required": ["topic", "participant_count"],
+      "properties": {
+        "code": {
+          "type": "string",
+          "description": "Short join code for the room"
+        },
+        "topic": {
+          "type": "string",
+          "description": "The subject being debated"
+        },
+        "description": {
+          "type": "string",
+          "description": "Optional extra framing from the host"
+        },
+        "language": {
+          "type": "string",
+          "description": "Preferred language for the room and result"
+        },
+        "participant_count": {
+          "type": "integer",
+          "description": "Number of people currently in the room"
         }
       }
     },
-    "context": {
-      "type": "string",
-      "description": "Optional — additional context about the community or situation"
+    "opinions": {
+      "type": "array",
+      "description": "Submitted participant opinions with reaction signals",
+      "items": {
+        "type": "object",
+        "required": ["opinion_id", "participant", "text", "yes_count", "neutral_count", "no_count"],
+        "properties": {
+          "opinion_id": {
+            "type": "string",
+            "description": "Stable opinion identifier"
+          },
+          "participant": {
+            "type": "string",
+            "description": "Anonymized participant label"
+          },
+          "text": {
+            "type": "string",
+            "description": "The submitted opinion text"
+          },
+          "yes_count": {
+            "type": "integer",
+            "description": "Current yes reaction total"
+          },
+          "neutral_count": {
+            "type": "integer",
+            "description": "Current neutral reaction total"
+          },
+          "no_count": {
+            "type": "integer",
+            "description": "Current no reaction total"
+          },
+          "reaction_reasons": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "type": "string",
+                  "enum": ["yes", "neutral", "no"]
+                },
+                "reason": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Optional explanations attached to reactions"
+          },
+          "attachment_count": {
+            "type": "integer",
+            "description": "How many attachments were submitted with the opinion"
+          }
+        }
+      }
     }
   }
 }
