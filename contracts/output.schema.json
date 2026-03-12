@@ -3,24 +3,24 @@
   "title": "GliaOutput",
   "description": "What Gemini returns for a shared discussion room",
   "type": "object",
-  "required": ["topic", "opinions", "camps", "spectrum", "compromise"],
+  "required": ["topic", "responses", "camps", "spectrum", "compromise"],
   "properties": {
     "topic": {
       "type": "string",
       "description": "The identified topic of debate"
     },
-    "total_opinions": {
+    "total_responses": {
       "type": "integer",
-      "description": "Total number of distinct opinions analyzed"
+      "description": "Total number of distinct participant responses analyzed"
     },
-    "opinions": {
+    "responses": {
       "type": "array",
-      "description": "Per-opinion classification and support weighting",
+      "description": "Per-response summary and support weighting",
       "items": {
         "type": "object",
-        "required": ["opinion_id", "participant", "summary", "sentiment", "support_score", "yes_count", "neutral_count", "no_count"],
+        "required": ["response_id", "participant", "summary", "choice", "support_score", "yes_count", "neutral_count", "no_count"],
         "properties": {
-          "opinion_id": {
+          "response_id": {
             "type": "string"
           },
           "participant": {
@@ -29,11 +29,12 @@
           },
           "summary": {
             "type": "string",
-            "description": "Short AI summary of the opinion"
+            "description": "Short AI summary of the participant's response"
           },
-          "sentiment": {
+          "choice": {
             "type": "string",
-            "enum": ["positive", "negative", "neutral", "mixed"]
+            "enum": ["yes", "neutral", "no"],
+            "description": "The participant's declared answer to the host statement"
           },
           "support_score": {
             "type": "number",
@@ -53,7 +54,7 @@
     },
     "camps": {
       "type": "array",
-      "description": "The identified opinion groups (usually 2-3)",
+      "description": "The identified response groups (usually 2-3)",
       "items": {
         "type": "object",
         "required": ["label", "position", "supporter_count", "reasons", "sentiment"],
@@ -90,15 +91,10 @@
     },
     "spectrum": {
       "type": "object",
-      "description": "Sentiment distribution for the visual spectrum bar",
-      "required": ["positive_percentage", "negative_percentage", "neutral_percentage", "mixed_percentage", "for_percentage", "against_percentage", "key_themes"],
+      "description": "Response distribution for the visual spectrum bar",
+      "required": ["yes_percentage", "neutral_percentage", "no_percentage", "key_themes"],
       "properties": {
-        "positive_percentage": {
-          "type": "number",
-          "minimum": 0,
-          "maximum": 100
-        },
-        "negative_percentage": {
+        "yes_percentage": {
           "type": "number",
           "minimum": 0,
           "maximum": 100
@@ -108,17 +104,7 @@
           "minimum": 0,
           "maximum": 100
         },
-        "mixed_percentage": {
-          "type": "number",
-          "minimum": 0,
-          "maximum": 100
-        },
-        "for_percentage": {
-          "type": "number",
-          "minimum": 0,
-          "maximum": 100
-        },
-        "against_percentage": {
+        "no_percentage": {
           "type": "number",
           "minimum": 0,
           "maximum": 100
@@ -132,7 +118,7 @@
               "mention_count": { "type": "integer" }
             }
           },
-          "description": "Most mentioned themes across all opinions"
+          "description": "Most mentioned themes across all responses"
         }
       }
     },

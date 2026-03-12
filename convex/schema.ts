@@ -49,7 +49,8 @@ export default defineSchema({
   opinions: defineTable({
     roomId: v.id("rooms"),
     participantId: v.id("participants"),
-    text: v.string(),
+    choice: v.union(v.literal("yes"), v.literal("neutral"), v.literal("no")),
+    reason: v.optional(v.string()),
     attachmentIds: v.array(v.id("_storage")),
     yesCount: v.number(),
     neutralCount: v.number(),

@@ -2,7 +2,30 @@
   "_comment": "Example of a complete Gemini response — use this to build the UI against",
 
   "topic": "24/7 Security Guard",
-  "total_opinions": 23,
+  "total_responses": 23,
+
+  "responses": [
+    {
+      "response_id": "resp_1",
+      "participant": "Participant 1",
+      "summary": "Supports adding stronger overnight protection because recent thefts made the building feel unsafe.",
+      "choice": "yes",
+      "support_score": 18,
+      "yes_count": 7,
+      "neutral_count": 1,
+      "no_count": 0
+    },
+    {
+      "response_id": "resp_2",
+      "participant": "Participant 2",
+      "summary": "Opposes a full-time guard because costs are already high and cameras may be enough.",
+      "choice": "no",
+      "support_score": 11,
+      "yes_count": 1,
+      "neutral_count": 2,
+      "no_count": 4
+    }
+  ],
 
   "camps": [
     {
@@ -38,9 +61,9 @@
   ],
 
   "spectrum": {
-    "for_percentage": 61,
-    "against_percentage": 39,
-    "neutral_percentage": 0,
+    "yes_percentage": 61,
+    "neutral_percentage": 9,
+    "no_percentage": 30,
     "key_themes": [
       { "theme": "Safety concerns", "mention_count": 12 },
       { "theme": "Cost / monthly fees", "mention_count": 8 },

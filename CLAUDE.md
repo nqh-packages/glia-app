@@ -6,12 +6,12 @@ Hackathon project. Fast build, but now multi-user. Shared rooms, live participat
 
 ## What It Does
 
-Glia lets a host start a discussion room around a topic, invite others by short code, short link, or QR code, collect names + opinions + optional photos, gather vote signals, and then generate an AI synthesis of the room.
+Glia lets a host start a discussion room around a topic, invite others by short code, short link, or QR code, collect names + explicit `yes | neutral | no` responses + optional photos, gather secondary vote signals on those responses, and then generate an AI synthesis of the room.
 
 Core outputs:
-- per-opinion sentiment: `positive`, `negative`, `neutral`, `mixed`
-- opinion camps / clusters
-- sentiment spectrum
+- per-response summaries with declared choice preserved
+- response camps / clusters
+- `yes | neutral | no` spectrum
 - key themes
 - compromise / suggested middle ground
 
@@ -22,22 +22,24 @@ Core outputs:
 - A room starts with a host-created topic / initial statement.
 - Join methods: short code, share link, QR code.
 - Participants enter a display name to join.
-- Each top-level comment is treated as an opinion for AI analysis.
-- A participant should prefer reacting to an existing comment instead of repeating the same reasoning.
-- Opinions may include optional image attachments.
+- The room topic is the main statement everyone is responding to.
+- Each participant submits one response to that main statement with a required `yes | neutral | no` choice.
+- A written reason is optional and is attached to that response.
+- Participants should prefer endorsing an existing reason instead of repeating the same reasoning.
+- Responses may include optional image attachments.
 - Reactions happen before analysis.
 - Reaction options are `yes`, `neutral`, and `no`.
 - Optional text reasoning appears only after a reaction is chosen.
 - Neutral is not agreement or disagreement. It means "I have context / nuance / a suggestion."
 - Analysis modes in v1:
   - `manual`: host clicks Analyze
-  - `autoCount`: analyze when opinion count reaches threshold
+  - `autoCount`: analyze when response count reaches threshold
   - `autoTimer`: analyze when timer ends
 - Capacity modes in v1:
-  - `limited`: host sets max participants/opinions
+- `limited`: host sets max participants/responses
   - `unlimited`: no cap
 - Browser persistence via cookie/localStorage is acceptable for hackathon scope.
-- AI decides sentiment/categorization from comments + reaction signals. The app only collects structured inputs.
+- AI synthesizes camps, themes, and compromise from the main statement, participant responses, and secondary reaction signals. The app only collects structured inputs.
 
 ---
 
@@ -53,7 +55,7 @@ Convex stores room + host token + short code
 Participants join by code / link / QR
   |
   v
-Convex stores participants + opinions + reactions + attachments
+Convex stores participants + statement responses + reactions + attachments
   |
   v
 Host/manual trigger OR auto trigger (count / timer)
@@ -97,9 +99,9 @@ This is no longer a frontend-only app. Backend state lives in Convex. Gemini run
     renderer.js           # Room + results rendering
     gemini.js             # Frontend Gemini helpers only if still needed; no API key here
   convex/
-    schema.ts             # Room / participant / opinion / vote / analysis schema
+    schema.ts             # Room / participant / response / vote / analysis schema
     rooms.ts              # Create / join / close / room state
-    opinions.ts           # Opinion submit / update
+    opinions.ts           # Response submit / update
     votes.ts              # Voting logic
     analyses.ts           # Analysis triggers + Gemini action orchestration
     http.ts               # Only if public HTTP routes become necessary
@@ -141,7 +143,8 @@ This is no longer a frontend-only app. Backend state lives in Convex. Gemini run
 ### `opinions`
 - `roomId`
 - `participantId`
-- `text`
+- `choice`: `yes | neutral | no`
+- `reason` optional
 - `attachmentIds`
 - `yesCount`
 - `neutralCount`
@@ -156,6 +159,7 @@ This is no longer a frontend-only app. Backend state lives in Convex. Gemini run
 - `reason` optional
 - timestamps
 - unique per participant/opinion pair
+- interpretation: secondary reaction to a participant response, not the participant's own primary choice
 
 ### `analyses`
 - `roomId`
@@ -183,10 +187,10 @@ This is no longer a frontend-only app. Backend state lives in Convex. Gemini run
 - `resumeParticipant({ roomId, joinToken })`
 - `resumeHost({ roomId, hostToken })`
 
-### Opinions / uploads
+### Responses / uploads
 - `generateUploadUrl()`
-- `submitOpinion({ roomId, joinToken, text, attachmentIds })`
-- `updateOpinion({ roomId, joinToken, text, attachmentIds })` if editing before analysis is allowed
+- `submitOpinion({ roomId, joinToken, choice, reason?, attachmentIds })`
+- `updateOpinion({ roomId, joinToken, choice, reason?, attachmentIds })` if editing before analysis is allowed
 - `listOpinions({ roomId })`
 
 ### Reactions
@@ -208,14 +212,15 @@ This is no longer a frontend-only app. Backend state lives in Convex. Gemini run
 
 Input contract must cover:
 - room topic / initial statement
-- participant opinions
+- participant responses with declared `yes | neutral | no`
+- optional written reasons per response
 - optional image attachments
-- reaction totals per opinion
+- reaction totals per response
 - optional reaction reasons
 - room metadata needed for analysis mode / language
 
 Output contract must cover:
-- per-opinion sentiment classification
+- per-response summary with declared choice preserved
 - camps / clusters
 - spectrum
 - key themes
@@ -253,11 +258,11 @@ Gemini output must be validated before saving.
 - Code collisions must be retried.
 - Limited rooms stop new joins/submissions at cap.
 - Unlimited rooms bypass cap checks.
-- Timer-triggered analysis must define behavior for too-few opinions.
+- Timer-triggered analysis must define behavior for too-few responses.
 - Host can close room manually.
 - Analysis can be re-run manually after new input if room remains open.
 - Auto-analysis must debounce to avoid repeated Gemini calls.
-- Duplicate reactions from one participant on one opinion are not allowed.
+- Duplicate reactions from one participant on one response are not allowed.
 - Frontend implementation of the reaction controls belongs to Francisco + Valentina. Backend work should only document and support the behavior.
 
 ---
