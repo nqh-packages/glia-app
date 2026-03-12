@@ -1,41 +1,71 @@
-# Glia — Community Decision Synthesizer
+# Glia — Shared Discussion Synthesizer
 
-Hackathon project. 3-hour build. Single-page web app.
+Hackathon project. Fast build, but now multi-user. Shared rooms, live participation, AI synthesis.
 
 ---
 
 ## What It Does
 
-Users paste text or images of community discussions (WhatsApp groups, Reddit threads, building assemblies). Gemini AI analyzes sentiment, identifies opposing camps, and generates a data-driven compromise.
+Glia lets a host start a discussion room around a topic, invite others by short code, short link, or QR code, collect names + opinions + optional photos, gather vote signals, and then generate an AI synthesis of the room.
+
+Core outputs:
+- per-opinion sentiment: `positive`, `negative`, `neutral`, `mixed`
+- opinion camps / clusters
+- sentiment spectrum
+- key themes
+- compromise / suggested middle ground
+
+---
+
+## Product Rules
+
+- A room starts with a host-created topic / initial statement.
+- Join methods: short code, share link, QR code.
+- Participants enter a display name to join.
+- One opinion per participant.
+- Opinions may include optional image attachments.
+- Voting happens before analysis.
+- Votes are up/down with optional reason text.
+- Analysis modes in v1:
+  - `manual`: host clicks Analyze
+  - `autoCount`: analyze when opinion count reaches threshold
+  - `autoTimer`: analyze when timer ends
+- Capacity modes in v1:
+  - `limited`: host sets max participants/opinions
+  - `unlimited`: no cap
+- Browser persistence via cookie/localStorage is acceptable for hackathon scope.
+- AI decides sentiment/categorization from comments + vote signals. The app only collects structured inputs.
 
 ---
 
 ## Architecture
 
+```text
+Host creates room
+  |
+  v
+Convex stores room + host token + short code
+  |
+  v
+Participants join by code / link / QR
+  |
+  v
+Convex stores participants + opinions + votes + attachments
+  |
+  v
+Host/manual trigger OR auto trigger (count / timer)
+  |
+  v
+Convex action calls Gemini
+  |
+  v
+Structured analysis saved to Convex
+  |
+  v
+Frontend renders live room state + results
 ```
-Single Page App (HTML + JS)
-    |
-    v
-Input: text / image paste
-    |
-    v
-Gemini API (client-side call)
-    |
-    v
-Output: camps + spectrum + compromise
-```
 
-No backend. No database. API key in client (hackathon scope).
-
----
-
-## Team
-
-| Person | Role | Focus Area |
-|--------|------|------------|
-| **Francisco** | Frontend Logic | Input handling, Gemini API calls, data flow |
-| **Valentina** | UI/UX + Presentation | Page layout, styling, results display, pitch |
-| **Huy** | Architecture + AI | Prompt engineering, JSON contracts, integration glue |
+This is no longer a frontend-only app. Backend state lives in Convex. Gemini runs server-side through a Convex action.
 
 ---
 
@@ -44,80 +74,232 @@ No backend. No database. API key in client (hackathon scope).
 | Layer | Choice |
 |-------|--------|
 | Frontend | Vanilla HTML + CSS + JS (or React if Francisco prefers) |
-| AI | Gemini API (client-side) |
-| Hosting | GitHub Pages or Vercel (free) |
-| Images | Gemini multimodal (accepts images directly) |
+| Realtime backend | Convex |
+| AI | Gemini via server-side Convex action |
+| File storage | Convex storage |
+| Sharing | Short code + join link + QR code |
+| Hosting | Vercel / static frontend + Convex deployment |
 
 ---
 
 ## Directory Structure
 
-```
+```text
 /
-  index.html          # Single page app
-  style.css           # Styles
+  index.html              # App shell
+  style.css               # Styles
   src/
-    main.js           # App entry, wires UI to AI
-    gemini.js         # Gemini API client
-    parser.js         # Input parsing (text extraction, image handling)
-    renderer.js       # Renders analysis results to DOM
+    main.js               # Frontend entry / routing / room UI wiring
+    parser.js             # Client-side input prep
+    renderer.js           # Room + results rendering
+    gemini.js             # Frontend Gemini helpers only if still needed; no API key here
+  convex/
+    schema.ts             # Room / participant / opinion / vote / analysis schema
+    rooms.ts              # Create / join / close / room state
+    opinions.ts           # Opinion submit / update
+    votes.ts              # Voting logic
+    analyses.ts           # Analysis triggers + Gemini action orchestration
+    http.ts               # Only if public HTTP routes become necessary
   contracts/
-    input.schema.json # Input contract
-    output.schema.json# Output contract
-  assets/             # Images, icons
-  CLAUDE.md           # This file
+    input.schema.json     # Structured payload sent to Gemini
+    output.schema.json    # Structured Gemini response
+  assets/                 # Images, icons
+  CLAUDE.md               # Shared project directive
 ```
 
 ---
 
-## JSON Contracts
+## Convex Data Model
 
-See `contracts/` folder. Two contracts:
+### `rooms`
+- `code`
+- `hostName`
+- `hostToken`
+- `topic`
+- `description` optional
+- `status`: `collecting | analyzing | analyzed | closed`
+- `capacityMode`: `limited | unlimited`
+- `maxParticipants` optional
+- `analysisMode`: `manual | autoCount | autoTimer`
+- `analysisThreshold` optional
+- `analysisDeadline` optional
+- `language` optional
+- `latestAnalysisId` optional
+- timestamps
 
-1. **Input** (`input.schema.json`): What gets sent to Gemini
-2. **Output** (`output.schema.json`): What Gemini returns, what UI renders
+### `participants`
+- `roomId`
+- `name`
+- `joinToken`
+- `role`: `host | participant`
+- `hasSubmitted`
+- timestamps
+
+### `opinions`
+- `roomId`
+- `participantId`
+- `text`
+- `attachmentIds`
+- `upvoteCount`
+- `downvoteCount`
+- timestamps
+
+### `votes`
+- `roomId`
+- `opinionId`
+- `participantId`
+- `value`: `1 | -1`
+- `reason` optional
+- timestamps
+- unique per participant/opinion pair
+
+### `analyses`
+- `roomId`
+- `status`: `pending | success | failed`
+- `inputSnapshot`
+- `output`
+- `model`
+- `promptVersion`
+- `trigger`: `manual | autoCount | autoTimer`
+- `error` optional
+- timestamp
 
 ---
 
-## Gemini Prompt Strategy
+## Function Map
 
-System prompt instructs Gemini to:
-1. Identify distinct opinion camps from the input
-2. Count/estimate supporters per camp
-3. Extract key reasons per camp
-4. Calculate sentiment distribution
-5. Generate a compromise that addresses both sides' concerns
+### Room lifecycle
+- `createRoom({ hostName, topic, capacityMode, maxParticipants?, analysisMode, analysisThreshold?, analysisDeadline? })`
+- `getRoomByCode({ code })`
+- `getRoomState({ roomId })`
+- `closeRoom({ roomId, hostToken })`
+
+### Join / session persistence
+- `joinRoom({ code, name })`
+- `resumeParticipant({ roomId, joinToken })`
+- `resumeHost({ roomId, hostToken })`
+
+### Opinions / uploads
+- `generateUploadUrl()`
+- `submitOpinion({ roomId, joinToken, text, attachmentIds })`
+- `updateOpinion({ roomId, joinToken, text, attachmentIds })` if editing before analysis is allowed
+- `listOpinions({ roomId })`
+
+### Voting
+- `castVote({ roomId, joinToken, opinionId, value, reason? })`
+- `removeVote({ roomId, joinToken, opinionId })` optional
+- `listVotesForRoom({ roomId })`
+
+### Analysis
+- `requestAnalysis({ roomId, hostToken })`
+- `scheduleAutoAnalysis({ roomId, trigger })`
+- `analyzeRoom({ roomId, trigger })`
+- `getLatestAnalysis({ roomId })`
 
 ---
 
-## Work Boundaries
+## AI Contracts
+
+`contracts/input.schema.json` and `contracts/output.schema.json` remain the source of truth.
+
+Input contract must cover:
+- room topic / initial statement
+- participant opinions
+- optional image attachments
+- vote totals per opinion
+- optional vote reasons
+- room metadata needed for analysis mode / language
+
+Output contract must cover:
+- per-opinion sentiment classification
+- camps / clusters
+- spectrum
+- key themes
+- compromise
+- support signal informed by votes
+
+Gemini output must be validated before saving.
+
+---
+
+## Gemini Rules
+
+- Gemini API key must not live in the browser.
+- Gemini runs server-side through a Convex action.
+- Use current Gemini SDK/model guidance, not legacy client-side direct fetches.
+- Store `model` and `promptVersion` on every analysis.
+- Anonymize participants in model input when possible.
+- Votes are weighting signals, not hard truth labels.
+- If analysis fails or returns invalid JSON, store error state and keep room usable.
+
+---
+
+## Session / Identity Rules
+
+- Host browser stores `hostToken`.
+- Participant browser stores `joinToken`.
+- Tokens live in cookie/localStorage for hackathon scope.
+- Token, not display name, is the real identity.
+- Refresh/revisit should restore the same host/participant session when possible.
+
+---
+
+## Edge Cases
+
+- Code collisions must be retried.
+- Limited rooms stop new joins/submissions at cap.
+- Unlimited rooms bypass cap checks.
+- Timer-triggered analysis must define behavior for too-few opinions.
+- Host can close room manually.
+- Analysis can be re-run manually after new input if room remains open.
+- Auto-analysis must debounce to avoid repeated Gemini calls.
+- Duplicate votes from one participant on one opinion are not allowed.
+
+---
+
+## Team Boundaries
 
 | Francisco touches | Valentina touches | Huy touches |
 |-------------------|-------------------|-------------|
-| `src/main.js` | `index.html` | `src/gemini.js` |
-| `src/parser.js` | `style.css` | `contracts/*` |
-| `src/renderer.js` (data logic) | `src/renderer.js` (HTML templates) | Gemini prompts |
+| `src/main.js` | `index.html` | `convex/schema.ts` |
+| room create/join flows | `style.css` | `convex/analyses.ts` |
+| opinion submit / vote wiring | room UI / QR / share presentation | `contracts/*` |
+| client state sync with Convex | results layout / vote UI polish | Gemini prompts / output validation |
+| `src/renderer.js` data wiring | `src/renderer.js` templates | session architecture / tokens / analysis orchestration |
 
-Overlap on `renderer.js` — Francisco handles data transforms, Valentina handles HTML/CSS output.
+Huy owns backend/session architecture, AI contracts, Gemini action orchestration, weighting semantics, and failure behavior.
 
 ---
 
 ## Commands
 
 ```bash
-# Local dev — just open index.html in browser
-# Or use live server:
-npx live-server .
+# Frontend dev
+npm install
+npm run dev
 
-# Deploy to GitHub Pages
-git push origin main  # auto-deploys if Pages enabled
+# Convex dev
+npx convex dev
+
+# Deploy frontend
+npm run build
+
+# Deploy Convex
+npx convex deploy
 ```
+
+If the frontend stays framework-light, keep the setup minimal. Do not add unnecessary infrastructure.
 
 ---
 
 ## Rules
 
-- Keep it simple. No frameworks unless Francisco wants React.
-- Gemini API key goes in a `config.js` file (gitignored for real, but ok for hackathon demo).
-- All three can push to main directly. No PRs needed (hackathon speed).
-- Commit often with clear messages.
+- Keep the product flow simple: create room, join room, submit, vote, analyze, review results.
+- Prioritize shareability and clarity over feature depth.
+- No browser-exposed Gemini key.
+- Prefer one structured source of truth for AI I/O in `contracts/*`.
+- Default modes unless product says otherwise:
+  - analysis mode = `manual`
+  - capacity mode = `unlimited`
+  - voting enabled before analysis
+- Optimize for hackathon speed, but do not leave core trust or ownership rules ambiguous.
