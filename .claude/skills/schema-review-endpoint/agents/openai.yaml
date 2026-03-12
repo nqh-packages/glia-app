@@ -1,4 +1,4 @@
 interface:
-  display_name: "Test Schema Endpoint"
-  short_description: "Send JSON schemas to the local review endpoint"
-  default_prompt: "Use $schema-review-endpoint to send a JSON schema to the local review endpoint and summarize the result."
+  display_name: "Glia Prompt Lab"
+  short_description: "Review schemas and seed full synthetic Convex prompt tests"
+  default_prompt: "Use $schema-review-endpoint to review Glia schemas or seed a full synthetic statement-first room in Convex, then summarize the Gemini analysis result."
