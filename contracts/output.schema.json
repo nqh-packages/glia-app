@@ -1,9 +1,9 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "GliaOutput",
-  "description": "What Gemini returns — the UI renders this directly",
+  "description": "What Gemini returns for a shared discussion room",
   "type": "object",
-  "required": ["topic", "camps", "spectrum", "compromise"],
+  "required": ["topic", "opinions", "camps", "spectrum", "compromise"],
   "properties": {
     "topic": {
       "type": "string",
@@ -12,6 +12,44 @@
     "total_opinions": {
       "type": "integer",
       "description": "Total number of distinct opinions analyzed"
+    },
+    "opinions": {
+      "type": "array",
+      "description": "Per-opinion classification and support weighting",
+      "items": {
+        "type": "object",
+        "required": ["opinion_id", "participant", "summary", "sentiment", "support_score", "yes_count", "neutral_count", "no_count"],
+        "properties": {
+          "opinion_id": {
+            "type": "string"
+          },
+          "participant": {
+            "type": "string",
+            "description": "Anonymized participant label"
+          },
+          "summary": {
+            "type": "string",
+            "description": "Short AI summary of the opinion"
+          },
+          "sentiment": {
+            "type": "string",
+            "enum": ["positive", "negative", "neutral", "mixed"]
+          },
+          "support_score": {
+            "type": "number",
+            "description": "AI-estimated support weight informed by votes and content"
+          },
+          "yes_count": {
+            "type": "integer"
+          },
+          "neutral_count": {
+            "type": "integer"
+          },
+          "no_count": {
+            "type": "integer"
+          }
+        }
+      }
     },
     "camps": {
       "type": "array",
@@ -53,19 +91,34 @@
     "spectrum": {
       "type": "object",
       "description": "Sentiment distribution for the visual spectrum bar",
-      "required": ["for_percentage", "against_percentage", "key_themes"],
+      "required": ["positive_percentage", "negative_percentage", "neutral_percentage", "mixed_percentage", "for_percentage", "against_percentage", "key_themes"],
       "properties": {
+        "positive_percentage": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "negative_percentage": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "neutral_percentage": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "mixed_percentage": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
         "for_percentage": {
           "type": "number",
           "minimum": 0,
           "maximum": 100
         },
         "against_percentage": {
-          "type": "number",
-          "minimum": 0,
-          "maximum": 100
-        },
-        "neutral_percentage": {
           "type": "number",
           "minimum": 0,
           "maximum": 100
