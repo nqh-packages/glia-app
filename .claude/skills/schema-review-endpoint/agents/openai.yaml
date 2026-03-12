@@ -1,0 +1,4 @@
+interface:
+  display_name: "Test Schema Endpoint"
+  short_description: "Send JSON schemas to the local review endpoint"
+  default_prompt: "Use $schema-review-endpoint to send a JSON schema to the local review endpoint and summarize the result."
