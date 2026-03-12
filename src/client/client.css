@@ -1,0 +1,203 @@
+/* Reddit-style sentiment feedback client — UI only */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "IBM Plex Sans", system-ui, -apple-system, sans-serif;
+  background: #0f0f0f;
+  color: #e6e6e6;
+  min-height: 100vh;
+  line-height: 1.5;
+}
+
+.client-app {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 3rem;
+}
+
+/* Header */
+.client-header {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #2d2d2d;
+}
+
+.client-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #fff;
+}
+
+.client-subtitle {
+  margin-top: 0.25rem;
+  font-size: 0.9375rem;
+  color: #8a8a8a;
+}
+
+/* Feedback input section */
+.feedback-section {
+  background: #1a1a1a;
+  border: 1px solid #2d2d2d;
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.feedback-label {
+  display: block;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #8a8a8a;
+  margin-bottom: 0.5rem;
+}
+
+.feedback-input {
+  width: 100%;
+  min-height: 100px;
+  padding: 0.75rem 1rem;
+  background: #0f0f0f;
+  border: 1px solid #2d2d2d;
+  border-radius: 6px;
+  color: #e6e6e6;
+  font-size: 0.9375rem;
+  font-family: inherit;
+  resize: vertical;
+  transition: border-color 0.15s ease;
+}
+
+.feedback-input::placeholder {
+  color: #5a5a5a;
+}
+
+.feedback-input:focus {
+  outline: none;
+  border-color: #ff6314;
+  box-shadow: 0 0 0 2px rgba(255, 99, 20, 0.2);
+}
+
+.feedback-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.btn {
+  padding: 0.5rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  font-family: inherit;
+  border: none;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, opacity 0.15s ease;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: #ff6314;
+  color: #fff;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #e55a10;
+}
+
+.send-status {
+  font-size: 0.8125rem;
+  color: #8a8a8a;
+}
+
+.feedback-error {
+  margin-top: 0.5rem;
+  font-size: 0.8125rem;
+  color: #f87171;
+}
+
+/* Sentiment groups */
+.sentiment-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.sentiment-group {
+  background: #1a1a1a;
+  border: 1px solid #2d2d2d;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.sentiment-group-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid #2d2d2d;
+}
+
+.sentiment-group-header--positive { color: #22c55e; }
+.sentiment-group-header--negative { color: #ef4444; }
+.sentiment-group-header--neutral { color: #94a3b8; }
+.sentiment-group-header--suggestion { color: #eab308; }
+.sentiment-group-header--default { color: #8a8a8a; }
+
+.sentiment-group-count {
+  font-weight: 500;
+  color: #6a6a6a;
+  font-size: 0.75rem;
+}
+
+.sentiment-group-list {
+  padding: 0.5rem 0;
+}
+
+.comment-card {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #252525;
+  font-size: 0.9375rem;
+}
+
+.comment-card:last-child {
+  border-bottom: none;
+}
+
+.comment-card:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.comment-text {
+  color: #e6e6e6;
+}
+
+.comment-meta {
+  margin-top: 0.35rem;
+  font-size: 0.75rem;
+  color: #6a6a6a;
+}
+
+/* Empty state */
+.empty-state {
+  text-align: center;
+  padding: 2rem 1rem;
+  font-size: 0.9375rem;
+  color: #6a6a6a;
+}
+
+.empty-state[hidden] {
+  display: none;
+}

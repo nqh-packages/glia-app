@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Platform Feedback — Sentiment</title>
+  <link rel="stylesheet" href="client.css">
+</head>
+<body>
+  <div class="client-app">
+    <header class="client-header">
+      <h1 class="client-title">Platform Feedback</h1>
+      <p class="client-subtitle">Share your feedback. Comments are grouped by sentiment.</p>
+    </header>
+
+    <section class="feedback-section">
+      <label for="feedback-input" class="feedback-label">Your comment</label>
+      <textarea
+        id="feedback-input"
+        class="feedback-input"
+        placeholder="Share your feedback about the platform..."
+        rows="4"
+      ></textarea>
+      <div class="feedback-actions">
+        <button type="button" id="send-btn" class="btn btn-primary">Send</button>
+        <span id="send-status" class="send-status" aria-live="polite"></span>
+      </div>
+      <p id="feedback-error" class="feedback-error" hidden></p>
+    </section>
+
+    <section class="sentiment-groups" id="sentiment-groups">
+      <!-- Groups rendered by client.js -->
+    </section>
+
+    <p id="empty-state" class="empty-state">No feedback yet. Submit a comment above.</p>
+  </div>
+
+  <script type="module" src="client.js"></script>
+</body>
+</html>
