@@ -28,6 +28,8 @@ let state = {
   topic: '',
   participantName: '',
   opinions: [],
+  selectedOpinionIcon: null,
+  myVotes: {},
 };
 
 function randomCode() {
@@ -111,10 +113,26 @@ function enterRoomView() {
   document.getElementById('room-role').textContent = state.isHost ? '(Host)' : '(Participant)';
   document.getElementById('host-actions').hidden = !state.isHost;
   document.getElementById('loading').hidden = true;
+  document.getElementById('room-opinion-input').hidden = true;
+  state.selectedOpinionIcon = null;
+  ['btn-opinion-thumb-up', 'btn-opinion-chat', 'btn-opinion-thumb-down'].forEach((id) => {
+    document.getElementById(id)?.classList.remove('active');
+  });
   renderOpinionsList();
   document.getElementById('opinion-text').value = '';
   document.getElementById('opinion-status').textContent = '';
   document.getElementById('opinion-error').hidden = true;
+}
+
+function showOpinionInput(iconButtonId) {
+  state.selectedOpinionIcon = iconButtonId;
+  ['btn-opinion-thumb-up', 'btn-opinion-chat', 'btn-opinion-thumb-down'].forEach((id) => {
+    const btn = document.getElementById(id);
+    if (btn) btn.classList.toggle('active', id === iconButtonId);
+  });
+  const el = document.getElementById('room-opinion-input');
+  el.hidden = false;
+  document.getElementById('opinion-text').focus();
 }
 
 function renderOpinionsList() {
@@ -122,21 +140,36 @@ function renderOpinionsList() {
   const empty = document.getElementById('opinions-empty');
   list.innerHTML = '';
   state.opinions.forEach((op, i) => {
+    const myVote = state.myVotes[i];
     const card = document.createElement('div');
     card.className = 'opinion-card';
     card.innerHTML = `
       <p class="opinion-text">${escapeHtml(op.text)}</p>
       <p class="opinion-meta">${escapeHtml(op.author)} · ${op.upvoteCount ?? 0} ↑ ${op.downvoteCount ?? 0} ↓</p>
       <div class="opinion-votes">
-        <button type="button" data-opinion-id="${i}" data-vote="1">↑ Up</button>
+        <button type="button" class="vote-btn ${myVote === 1 ? 'active' : ''}" data-opinion-id="${i}" data-vote="1">↑ Up</button>
         <span class="vote-count"></span>
-        <button type="button" data-opinion-id="${i}" data-vote="-1">↓ Down</button>
+        <button type="button" class="vote-btn ${myVote === -1 ? 'active' : ''}" data-opinion-id="${i}" data-vote="-1">↓ Down</button>
       </div>
     `;
     list.appendChild(card);
   });
   empty.hidden = state.opinions.length > 0;
 }
+
+document.getElementById('opinions-list').addEventListener('click', (e) => {
+  const btn = e.target.closest('.vote-btn[data-opinion-id][data-vote]');
+  if (!btn) return;
+  const i = parseInt(btn.dataset.opinionId, 10);
+  const value = parseInt(btn.dataset.vote, 10);
+  const op = state.opinions[i];
+  if (!op) return;
+  const prev = state.myVotes[i];
+  state.myVotes[i] = prev === value ? undefined : value;
+  op.upvoteCount = (op.upvoteCount ?? 0) - (prev === 1 ? 1 : 0) + (state.myVotes[i] === 1 ? 1 : 0);
+  op.downvoteCount = (op.downvoteCount ?? 0) - (prev === -1 ? 1 : 0) + (state.myVotes[i] === -1 ? 1 : 0);
+  renderOpinionsList();
+});
 
 function escapeHtml(s) {
   const div = document.createElement('div');
@@ -167,6 +200,10 @@ document.getElementById('btn-submit-opinion').addEventListener('click', () => {
 
 document.getElementById('btn-copy-code-inroom').addEventListener('click', () => {
   navigator.clipboard.writeText(state.roomCode);
+});
+
+['btn-opinion-thumb-up', 'btn-opinion-chat', 'btn-opinion-thumb-down'].forEach((id) => {
+  document.getElementById(id).addEventListener('click', () => showOpinionInput(id));
 });
 
 // Analyze (host): stub with mock result, then show results view

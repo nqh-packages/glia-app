@@ -73,7 +73,14 @@
     <!-- ROOM: Topic, opinions, submit, vote, analyze -->
     <section id="view-room" class="view" hidden>
       <header class="room-header">
-        <h1 id="room-topic-title">Topic</h1>
+        <div class="room-title-row">
+          <h1 id="room-topic-title" class="room-title">Topic</h1>
+          <div class="room-title-actions" aria-label="Add your view">
+            <button type="button" id="btn-opinion-thumb-up" class="btn-icon" title="Thumbs up">👍</button>
+            <button type="button" id="btn-opinion-chat" class="btn-icon" title="Comment">💬</button>
+            <button type="button" id="btn-opinion-thumb-down" class="btn-icon" title="Thumbs down">👎</button>
+          </div>
+        </div>
         <p class="room-meta">
           <span id="room-code-badge" class="badge">—</span>
           <span id="room-role" class="role"></span>
@@ -87,8 +94,8 @@
         <button id="btn-copy-code-inroom" type="button" class="btn btn-small">Copy code</button>
       </div>
 
-      <!-- Submit opinion -->
-      <section class="input-section room-input">
+      <!-- Submit opinion (shown when user clicks 👍 / 💬 / 👎) -->
+      <section id="room-opinion-input" class="input-section room-input" hidden>
         <label for="opinion-text" class="label">Your opinion</label>
         <textarea id="opinion-text" class="input textarea" placeholder="Share your view..." rows="4"></textarea>
         <div class="image-upload-inline">
