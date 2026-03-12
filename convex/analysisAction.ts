@@ -16,33 +16,35 @@ const SYSTEM_PROMPT = `You are Glia, an AI mediator for shared discussion rooms.
 
 You receive:
 - one room topic / initial statement
-- participant opinions
-- reaction counts for yes / neutral / no
+- participant responses to that statement
+- each response includes the participant's declared choice: yes / neutral / no
+- secondary reaction counts for yes / neutral / no on each response
 - optional reaction reasons
 - optional image attachments
 
 Return only valid JSON.
 
 Requirements:
-1. Classify each opinion as one of: positive, negative, neutral, mixed.
-2. Identify 2-4 opinion camps when meaningful.
-3. Explain each camp's position and key reasons.
-4. Use reaction signals as support weighting, not as ground truth.
-5. Produce a sentiment spectrum and key themes.
-6. Propose a practical compromise grounded in what participants actually said.
-7. Keep names anonymized as "Participant 1", "Participant 2", etc.
-8. If there is not enough information, still return the best structured answer you can.
+1. Do not change a participant's declared choice. Use it as the source of truth for whether they answered yes, neutral, or no to the main statement.
+2. Summarize each response briefly.
+3. Identify 2-4 response camps when meaningful.
+4. Explain each camp's position and key reasons.
+5. Use secondary reaction signals as support weighting, not as ground truth.
+6. Produce a yes / neutral / no spectrum and key themes.
+7. Propose a practical compromise grounded in what participants actually said.
+8. Keep names anonymized as "Participant 1", "Participant 2", etc.
+9. If there is not enough information, still return the best structured answer you can.
 
 Return this shape exactly:
 {
   "topic": "string",
-  "total_opinions": 0,
-  "opinions": [
+  "total_responses": 0,
+  "responses": [
     {
-      "opinion_id": "string",
+      "response_id": "string",
       "participant": "string",
       "summary": "string",
-      "sentiment": "positive | negative | neutral | mixed",
+      "choice": "yes | neutral | no",
       "support_score": 0,
       "yes_count": 0,
       "neutral_count": 0,
@@ -60,12 +62,9 @@ Return this shape exactly:
     }
   ],
   "spectrum": {
-    "positive_percentage": 0,
-    "negative_percentage": 0,
+    "yes_percentage": 0,
     "neutral_percentage": 0,
-    "mixed_percentage": 0,
-    "for_percentage": 0,
-    "against_percentage": 0,
+    "no_percentage": 0,
     "key_themes": [
       { "theme": "string", "mention_count": 0 }
     ]
@@ -92,16 +91,17 @@ function buildPrompt(snapshot: any) {
         language: snapshot.room.language,
         participantCount: snapshot.participantCount
       },
-      opinions: snapshot.opinions.map((opinion: any) => {
+      responses: snapshot.opinions.map((opinion: any) => {
         if (!anonymizedParticipants.has(opinion.participantId)) {
           anonymizedParticipants.set(opinion.participantId, `Participant ${participantNumber}`);
           participantNumber += 1;
         }
 
         return {
-          opinion_id: String(opinion.opinionId),
+          response_id: String(opinion.opinionId),
           participant: anonymizedParticipants.get(opinion.participantId),
-          text: opinion.text,
+          choice: opinion.choice,
+          reason: opinion.reason,
           yes_count: opinion.yesCount,
           neutral_count: opinion.neutralCount,
           no_count: opinion.noCount,
@@ -115,14 +115,9 @@ function buildPrompt(snapshot: any) {
   );
 }
 
-function normalizeOpinionSentiment(sentiment: unknown) {
-  if (
-    sentiment === "positive" ||
-    sentiment === "negative" ||
-    sentiment === "neutral" ||
-    sentiment === "mixed"
-  ) {
-    return sentiment;
+function normalizeResponseChoice(choice: unknown) {
+  if (choice === "yes" || choice === "neutral" || choice === "no") {
+    return choice;
   }
   return "neutral";
 }
@@ -145,7 +140,7 @@ function validateAnalysisOutput(payload: any) {
     throw new Error("Gemini returned an invalid payload.");
   }
 
-  const opinions = Array.isArray(payload.opinions) ? payload.opinions : [];
+  const responses = Array.isArray(payload.responses) ? payload.responses : [];
   const camps = Array.isArray(payload.camps) ? payload.camps : [];
   const keyThemes = Array.isArray(payload?.spectrum?.key_themes)
     ? payload.spectrum.key_themes
@@ -154,24 +149,23 @@ function validateAnalysisOutput(payload: any) {
     ? payload.compromise.addresses
     : [];
 
-  const positiveCount = opinions.filter((opinion) => opinion.sentiment === "positive").length;
-  const negativeCount = opinions.filter((opinion) => opinion.sentiment === "negative").length;
-  const neutralCount = opinions.filter((opinion) => opinion.sentiment === "neutral").length;
-  const mixedCount = opinions.filter((opinion) => opinion.sentiment === "mixed").length;
-  const denominator = opinions.length || 1;
+  const yesCount = responses.filter((response) => response.choice === "yes").length;
+  const neutralCount = responses.filter((response) => response.choice === "neutral").length;
+  const noCount = responses.filter((response) => response.choice === "no").length;
+  const denominator = responses.length || 1;
 
   return {
     topic: String(payload.topic ?? ""),
-    total_opinions: Number(payload.total_opinions ?? opinions.length),
-    opinions: opinions.map((opinion: any) => ({
-      opinion_id: String(opinion.opinion_id ?? ""),
-      participant: String(opinion.participant ?? ""),
-      summary: String(opinion.summary ?? ""),
-      sentiment: normalizeOpinionSentiment(opinion.sentiment),
-      support_score: Number(opinion.support_score ?? 0),
-      yes_count: Number(opinion.yes_count ?? 0),
-      neutral_count: Number(opinion.neutral_count ?? 0),
-      no_count: Number(opinion.no_count ?? 0)
+    total_responses: Number(payload.total_responses ?? responses.length),
+    responses: responses.map((response: any) => ({
+      response_id: String(response.response_id ?? ""),
+      participant: String(response.participant ?? ""),
+      summary: String(response.summary ?? ""),
+      choice: normalizeResponseChoice(response.choice),
+      support_score: Number(response.support_score ?? 0),
+      yes_count: Number(response.yes_count ?? 0),
+      neutral_count: Number(response.neutral_count ?? 0),
+      no_count: Number(response.no_count ?? 0)
     })),
     camps: camps.map((camp: any) => ({
       label: String(camp.label ?? ""),
@@ -184,20 +178,15 @@ function validateAnalysisOutput(payload: any) {
         : []
     })),
     spectrum: {
-      positive_percentage: clampPercentage(
-        Number(payload?.spectrum?.positive_percentage ?? (positiveCount / denominator) * 100)
-      ),
-      negative_percentage: clampPercentage(
-        Number(payload?.spectrum?.negative_percentage ?? (negativeCount / denominator) * 100)
+      yes_percentage: clampPercentage(
+        Number(payload?.spectrum?.yes_percentage ?? (yesCount / denominator) * 100)
       ),
       neutral_percentage: clampPercentage(
         Number(payload?.spectrum?.neutral_percentage ?? (neutralCount / denominator) * 100)
       ),
-      mixed_percentage: clampPercentage(
-        Number(payload?.spectrum?.mixed_percentage ?? (mixedCount / denominator) * 100)
+      no_percentage: clampPercentage(
+        Number(payload?.spectrum?.no_percentage ?? (noCount / denominator) * 100)
       ),
-      for_percentage: clampPercentage(Number(payload?.spectrum?.for_percentage ?? 0)),
-      against_percentage: clampPercentage(Number(payload?.spectrum?.against_percentage ?? 0)),
       key_themes: keyThemes.map((theme: any) => ({
         theme: String(theme.theme ?? ""),
         mention_count: Number(theme.mention_count ?? 0)
@@ -243,7 +232,7 @@ export const runAnalysis = actionGeneric({
         roomId: args.roomId,
         analysisId: args.analysisId,
         status: "failed",
-        error: "At least one opinion is required before analysis."
+        error: "At least one participant response is required before analysis."
       });
       return { ok: false };
     }
@@ -266,7 +255,7 @@ export const runAnalysis = actionGeneric({
 
           const bytes = new Uint8Array(await blob.arrayBuffer());
           parts.push({
-            text: `Attachment for opinion ${String(opinion.opinionId)} by ${opinion.participantName}.`
+            text: `Attachment for response ${String(opinion.opinionId)} by ${opinion.participantName}.`
           });
           parts.push({
             inlineData: {

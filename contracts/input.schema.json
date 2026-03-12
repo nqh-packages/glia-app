@@ -33,10 +33,10 @@
     },
     "opinions": {
       "type": "array",
-      "description": "Submitted participant opinions with reaction signals",
+      "description": "Submitted participant responses to the main statement, plus secondary reaction signals",
       "items": {
         "type": "object",
-        "required": ["opinion_id", "participant", "text", "yes_count", "neutral_count", "no_count"],
+        "required": ["opinion_id", "participant", "choice", "yes_count", "neutral_count", "no_count"],
         "properties": {
           "opinion_id": {
             "type": "string",
@@ -46,9 +46,14 @@
             "type": "string",
             "description": "Anonymized participant label"
           },
-          "text": {
+          "choice": {
             "type": "string",
-            "description": "The submitted opinion text"
+            "enum": ["yes", "neutral", "no"],
+            "description": "The participant's explicit answer to the host's main statement"
+          },
+          "reason": {
+            "type": "string",
+            "description": "Optional explanation for why the participant chose that answer"
           },
           "yes_count": {
             "type": "integer",

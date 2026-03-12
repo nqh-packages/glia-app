@@ -57,7 +57,8 @@ export const submitOpinion = mutationGeneric({
   args: {
     roomId: v.id("rooms"),
     joinToken: v.string(),
-    text: v.string(),
+    choice: v.union(v.literal("yes"), v.literal("neutral"), v.literal("no")),
+    reason: v.optional(v.string()),
     attachmentIds: v.array(v.id("_storage"))
   },
   handler: async (ctx, args) => {
@@ -85,7 +86,8 @@ export const submitOpinion = mutationGeneric({
     const opinionId = await ctx.db.insert("opinions", {
       roomId: room._id,
       participantId: participant._id,
-      text: args.text.trim(),
+      choice: args.choice,
+      reason: args.reason?.trim() || undefined,
       attachmentIds: args.attachmentIds,
       yesCount: 0,
       neutralCount: 0,
@@ -109,7 +111,8 @@ export const updateOpinion = mutationGeneric({
   args: {
     roomId: v.id("rooms"),
     joinToken: v.string(),
-    text: v.string(),
+    choice: v.union(v.literal("yes"), v.literal("neutral"), v.literal("no")),
+    reason: v.optional(v.string()),
     attachmentIds: v.array(v.id("_storage"))
   },
   handler: async (ctx, args) => {
@@ -134,7 +137,8 @@ export const updateOpinion = mutationGeneric({
     }
 
     await ctx.db.patch(opinion._id, {
-      text: args.text.trim(),
+      choice: args.choice,
+      reason: args.reason?.trim() || undefined,
       attachmentIds: args.attachmentIds,
       updatedAt: now()
     });
