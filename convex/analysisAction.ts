@@ -85,9 +85,9 @@ function validateAnalysisOutput(payload: any) {
     ? payload.compromise.addresses
     : [];
 
-  const yesCount = responses.filter((response) => response.choice === "yes").length;
-  const neutralCount = responses.filter((response) => response.choice === "neutral").length;
-  const noCount = responses.filter((response) => response.choice === "no").length;
+  const yesCount = responses.filter((r: { choice?: string }) => r.choice === "yes").length;
+  const neutralCount = responses.filter((r: { choice?: string }) => r.choice === "neutral").length;
+  const noCount = responses.filter((r: { choice?: string }) => r.choice === "no").length;
   const denominator = responses.length || 1;
 
   return {

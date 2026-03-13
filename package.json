@@ -5,8 +5,10 @@
   "main": "src/main.js",
   "scripts": {
     "build": "vite build",
+    "build:cf": "vite build",
     "convex:dev": "npx convex dev",
     "dev": "vite",
+    "deploy:cf": "npm run build:cf && wrangler deploy",
     "preview": "vite preview",
     "prepare": "bash ./scripts/install-hooks.sh",
     "setup-hooks": "bash ./scripts/install-hooks.sh",
@@ -36,6 +38,7 @@
     "convex-test": "^0.0.41",
     "typescript": "^5.9.3",
     "vite": "^8.0.0",
-    "vitest": "^4.1.0"
+    "vitest": "^4.1.0",
+    "wrangler": "^4.72.0"
   }
 }
