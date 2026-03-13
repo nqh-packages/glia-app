@@ -28,8 +28,8 @@
         <div class="join-block">
           <label for="join-code" class="label">Join with code</label>
           <div class="join-row">
-            <input type="text" id="join-code" placeholder="e.g. ABC12" maxlength="8" autocomplete="off" required>
-            <input type="text" id="join-name" placeholder="Your name" class="join-name" required>
+            <input type="text" id="join-code" class="input" placeholder="e.g. ABC12" maxlength="8" autocomplete="off" required>
+            <input type="text" id="join-name" class="input join-name" placeholder="Your name" required>
             <button id="btn-join-room" type="button" class="btn btn-secondary">Join</button>
           </div>
         </div>
@@ -66,22 +66,28 @@
       <h1>Room created</h1>
       <p class="subtitle">Share the code, send the link, and pull people into the discussion while the question is still fresh.</p>
       <div class="share-block">
-        <div class="share-code">
-          <span class="label">Code</span>
-          <strong id="display-room-code" class="room-code">—</strong>
-          <button id="btn-copy-code" type="button" class="btn btn-small">Copy</button>
-        </div>
-        <div class="share-link">
-          <span class="label">Link</span>
-          <input type="text" id="display-join-link" readonly class="input input-readonly">
-          <button id="btn-copy-link" type="button" class="btn btn-small">Copy link</button>
-        </div>
-        <div id="qr-placeholder" class="qr-placeholder">
-          <span class="qr-label">QR code</span>
-          <img id="display-qr-image" class="qr-image" alt="Room join QR code" hidden>
-          <div id="qr-loading" class="qr-box">Loading QR…</div>
-          <div class="qr-actions">
-            <a id="btn-download-qr" class="btn btn-small" download="glia-room-qr.png" hidden>Download QR</a>
+        <div class="share-cols">
+          <div class="share-cols__main">
+            <div class="share-code">
+              <span class="label">Code</span>
+              <strong id="display-room-code" class="room-code">—</strong>
+              <button id="btn-copy-code" type="button" class="btn btn-small">Copy</button>
+            </div>
+            <div class="share-link">
+              <span class="label">Link</span>
+              <input type="text" id="display-join-link" readonly class="input input-readonly">
+              <button id="btn-copy-link" type="button" class="btn btn-small">Copy link</button>
+            </div>
+          </div>
+          <div class="share-cols__qr">
+            <div id="qr-placeholder" class="qr-placeholder">
+              <span class="qr-label">QR code</span>
+              <img id="display-qr-image" class="qr-image" alt="Room join QR code" hidden>
+              <div id="qr-loading" class="qr-box">Loading QR…</div>
+              <div class="qr-actions">
+                <a id="btn-download-qr" class="btn btn-small" download="glia-room-qr.png" hidden>Download QR</a>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -97,9 +103,9 @@
         <div class="room-title-row">
           <h1 id="room-topic-title" class="room-title">Topic</h1>
           <div class="room-title-actions" aria-label="Add your view">
-            <button type="button" id="btn-opinion-thumb-up" class="btn-icon btn-icon--yes" title="Yes">Y</button>
-            <button type="button" id="btn-opinion-chat" class="btn-icon btn-icon--neutral" title="Neutral">N</button>
-            <button type="button" id="btn-opinion-thumb-down" class="btn-icon btn-icon--no" title="No">X</button>
+            <button type="button" id="btn-opinion-thumb-up" class="btn-icon btn-icon--yes" title="Yes">Yes</button>
+            <button type="button" id="btn-opinion-chat" class="btn-icon btn-icon--neutral" title="Neutral">Neutral</button>
+            <button type="button" id="btn-opinion-thumb-down" class="btn-icon btn-icon--no" title="No">No</button>
           </div>
         </div>
         <p class="room-meta">
@@ -120,10 +126,6 @@
       <section id="room-opinion-input" class="input-section room-input" hidden>
         <label for="opinion-text" class="label">Your response</label>
         <textarea id="opinion-text" class="input textarea" placeholder="Add your reason or nuance..." rows="4"></textarea>
-        <div class="image-upload-inline">
-          <label for="opinion-image" class="label-inline">Add image (optional)</label>
-          <input type="file" id="opinion-image" accept="image/*">
-        </div>
         <div class="form-actions">
           <button id="btn-submit-opinion" type="button" class="btn btn-primary">Submit response</button>
         </div>
@@ -162,6 +164,7 @@
       </div>
       <div class="form-actions">
         <button id="btn-back-to-room" type="button" class="btn btn-secondary">Back to room</button>
+        <button id="btn-new-room" type="button" class="btn btn-secondary">New room</button>
       </div>
     </section>
   </main>

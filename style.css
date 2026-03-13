@@ -395,6 +395,24 @@ h4 {
   margin-bottom: 1.5rem;
 }
 
+.share-cols {
+  display: grid;
+  gap: 1.5rem;
+}
+
+@media (min-width: 600px) {
+  .share-cols {
+    grid-template-columns: 1fr auto;
+    align-items: start;
+  }
+
+  .share-cols__qr .qr-placeholder {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: none;
+  }
+}
+
 .share-code,
 .share-link {
   margin-bottom: 1rem;
@@ -500,8 +518,8 @@ h4 {
 }
 
 .btn-icon {
-  width: 3.2rem;
-  height: 3.2rem;
+  height: 2.75rem;
+  padding: 0 1.1rem;
   border-radius: 999px;
   border: 1px solid var(--line);
   background: rgba(255, 252, 247, 0.9);
@@ -509,9 +527,11 @@ h4 {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.96rem;
-  font-weight: 800;
+  font-size: 0.78rem;
+  font-weight: 700;
   text-transform: uppercase;
+  letter-spacing: 0.12em;
+  white-space: nowrap;
   cursor: pointer;
   transition:
     transform 160ms ease,
@@ -594,48 +614,49 @@ h4 {
 
 .share-inroom {
   margin-bottom: 1.25rem;
-  padding: 0.95rem 1rem;
+  padding: 0.75rem 1rem;
   border-radius: 1rem;
   border: 1px dashed var(--line-strong);
   background: rgba(255, 251, 244, 0.65);
   color: var(--muted);
   font-size: 0.88rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.55rem;
+}
+
+.share-inroom > .label {
+  display: inline;
+  margin-bottom: 0;
+  color: var(--muted);
+  font-size: 0.75rem;
+  letter-spacing: 0.16em;
 }
 
 .share-inroom code {
   display: inline-flex;
   align-items: center;
-  margin: 0 0.5rem;
-  padding: 0.35rem 0.58rem;
+  padding: 0.3rem 0.58rem;
   border-radius: 999px;
   font-family: var(--sans);
   font-size: 0.78rem;
   font-weight: 700;
   background: rgba(25, 21, 19, 0.06);
 }
-
-.share-inroom .btn-small {
-  margin-top: 0.5rem;
-  margin-right: 0.5rem;
-}
 .room-input {
   margin-bottom: 1.5rem;
 }
 
-.image-upload-inline {
-  margin-top: 0.75rem;
-}
-
-.image-upload-inline input[type="file"] {
-  width: 100%;
-  margin-top: 0.4rem;
-  font-family: var(--sans);
-  font-size: 0.88rem;
-  color: var(--muted);
-}
-
 .opinions-section {
   padding: 1.2rem;
+}
+
+.opinions-section h2 {
+  font-size: clamp(1.2rem, 2vw, 1.45rem);
+  margin-top: 0;
+  margin-bottom: 0.9rem;
+  letter-spacing: -0.015em;
 }
 
 .opinions-list {
@@ -793,10 +814,27 @@ h4 {
 }
 
 .empty-state {
-  padding: 1.75rem 1rem 0.75rem;
+  padding: 2rem 1rem 1.5rem;
   text-align: center;
   color: var(--muted);
   font-size: 0.94rem;
+  line-height: 1.55;
+}
+
+.empty-state::before {
+  content: "";
+  display: block;
+  width: 2.5rem;
+  height: 3px;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    var(--yes) 0 33%,
+    var(--neutral) 33% 66%,
+    var(--no) 66% 100%
+  );
+  margin: 0 auto 1.1rem;
+  opacity: 0.5;
 }
 
 .empty-state[hidden],

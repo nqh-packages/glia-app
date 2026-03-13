@@ -1,4 +1,4 @@
-import { ConvexHttpClient } from 'convex/browser';
+import { ConvexClient } from 'convex/browser';
 import { api } from '../convex/_generated/api.js';
 import { renderResults } from './renderer.js';
 
@@ -14,9 +14,9 @@ const PRIMARY_CHOICE_BY_BUTTON = {
   'btn-opinion-thumb-down': 'no',
 };
 const REACTION_BUTTONS = [
-  { kind: 'yes', label: '👍 Yes' },
-  { kind: 'neutral', label: '💬 Neutral' },
-  { kind: 'no', label: '👎 No' },
+  { kind: 'yes', label: 'Yes' },
+  { kind: 'neutral', label: 'Neutral' },
+  { kind: 'no', label: 'No' },
 ];
 
 const app = document.getElementById('app');
@@ -39,6 +39,8 @@ const state = {
 };
 
 let convexClient = null;
+let roomSubscription = null;
+let roomSubscriptionKey = null;
 
 function logAgentEvent() {}
 
@@ -87,7 +89,7 @@ function setButtonBusy(buttonId, isBusy, busyLabel, idleLabel) {
 }
 
 async function getAppConfig() {
-  const localConfig = await import('../config.js')
+  const localConfig = await import(/* @vite-ignore */ '../config.js')
     .then((module) => module.APP_CONFIG ?? null)
     .catch(() => null);
 
@@ -112,7 +114,7 @@ async function getConvexClient() {
     throw new Error('Missing Convex URL. Add `config.js` or set `VITE_CONVEX_URL`.');
   }
 
-  convexClient = new ConvexHttpClient(convexUrl);
+  convexClient = new ConvexClient(convexUrl);
   return convexClient;
 }
 
@@ -180,7 +182,6 @@ function resetOpinionComposer() {
   });
   document.getElementById('room-opinion-input').hidden = true;
   document.getElementById('opinion-text').value = '';
-  document.getElementById('opinion-image').value = '';
   document.getElementById('opinion-status').textContent = '';
   clearError('opinion-error');
 }
@@ -323,17 +324,49 @@ async function loadRoomShareAssets(code, joinUrl) {
   }
 }
 
-async function refreshRoomState({ showResultsWhenReady = false } = {}) {
+function getRoomStateArgs() {
   if (!state.roomId) {
-    return;
+    return null;
   }
 
-  const snapshot = await convexQuery(api.rooms.getRoomState, {
+  return {
     roomId: state.roomId,
     joinToken: state.joinToken ?? undefined,
     hostToken: state.hostToken ?? undefined,
-  });
+  };
+}
 
+function syncAnalysisState() {
+  if (state.latestAnalysis?.status === 'pending') {
+    loadingEl.hidden = false;
+    setStatus(
+      'opinion-status',
+      state.isHost ? 'Analysis running...' : 'Analysis in progress...'
+    );
+    return;
+  }
+
+  loadingEl.hidden = true;
+
+  if (state.latestAnalysis?.status === 'failed') {
+    showError('opinion-error', state.latestAnalysis.error || 'Analysis failed.');
+    return;
+  }
+
+  if (state.latestAnalysis?.status === 'success' && state.latestAnalysis.output) {
+    clearError('opinion-error');
+    setStatus('opinion-status', '');
+    renderResults(state.latestAnalysis.output);
+    if (app.dataset.view === 'room' || app.dataset.view === 'results') {
+      setView('results');
+    }
+    return;
+  }
+
+  clearError('opinion-error');
+}
+
+function applyRoomSnapshot(snapshot) {
   if (!snapshot) {
     clearSession();
     throw new Error('Room not found.');
@@ -357,68 +390,57 @@ async function refreshRoomState({ showResultsWhenReady = false } = {}) {
 
   persistSession();
   updateRoomUI();
-
-  if (
-    showResultsWhenReady &&
-    state.latestAnalysis?.status === 'success' &&
-    state.latestAnalysis.output
-  ) {
-    renderResults(state.latestAnalysis.output);
-    loadingEl.hidden = true;
-    setView('results');
-    return true;
-  }
-
-  return false;
+  syncAnalysisState();
 }
 
-async function waitForAnalysisResult() {
-  for (let attempt = 0; attempt < 20; attempt += 1) {
-    const didRender = await refreshRoomState({ showResultsWhenReady: true });
-
-    if (didRender) {
-      return;
-    }
-
-    if (state.latestAnalysis?.status === 'failed') {
-      throw new Error(state.latestAnalysis.error || 'Analysis failed.');
-    }
-
-    await new Promise((resolve) => {
-      window.setTimeout(resolve, 1500);
-    });
+function stopRoomSubscription() {
+  if (roomSubscription) {
+    roomSubscription();
+    roomSubscription = null;
   }
-
-  throw new Error('Analysis is still running. Please try again in a moment.');
+  roomSubscriptionKey = null;
 }
 
-async function uploadSelectedFiles(fileList) {
-  const files = Array.from(fileList ?? []);
-  if (!files.length) {
-    return [];
+async function ensureRoomSubscription() {
+  const args = getRoomStateArgs();
+  if (!args) {
+    stopRoomSubscription();
+    return;
   }
 
-  const storageIds = [];
+  const subscriptionKey = JSON.stringify(args);
+  if (roomSubscription && roomSubscriptionKey === subscriptionKey) {
+    return;
+  }
 
-  for (const file of files) {
-    const uploadUrl = await convexMutation(api.opinions.generateUploadUrl, {});
-    const response = await fetch(uploadUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': file.type || 'application/octet-stream',
-      },
-      body: file,
-    });
-
-    if (!response.ok) {
-      throw new Error(`Upload failed for ${file.name}.`);
+  stopRoomSubscription();
+  const client = await getConvexClient();
+  roomSubscriptionKey = subscriptionKey;
+  roomSubscription = client.onUpdate(
+    api.rooms.getRoomState,
+    args,
+    (snapshot) => {
+      try {
+        applyRoomSnapshot(snapshot);
+      } catch (error) {
+        showError('landing-error', error.message || 'Room not found.');
+        setView('landing');
+      }
+    },
+    (error) => {
+      showError('opinion-error', error.message || 'Realtime sync disconnected.');
     }
+  );
+}
 
-    const payload = await response.json();
-    storageIds.push(payload.storageId);
+async function refreshRoomState() {
+  const args = getRoomStateArgs();
+  if (!args) {
+    return;
   }
 
-  return storageIds;
+  const snapshot = await convexQuery(api.rooms.getRoomState, args);
+  applyRoomSnapshot(snapshot);
 }
 
 async function createRoom() {
@@ -461,6 +483,7 @@ async function createRoom() {
     state.reactionsByOpinionId = {};
 
     persistSession();
+    await ensureRoomSubscription();
 
     document.getElementById('display-room-code').textContent = result.code;
     setView('room-created');
@@ -509,6 +532,7 @@ async function joinRoom() {
     state.participantId = result.participantId;
     state.viewerHasSubmitted = false;
 
+    await ensureRoomSubscription();
     for (let attempt = 0; attempt < 3; attempt += 1) {
       try {
         await refreshRoomState();
@@ -523,6 +547,7 @@ async function joinRoom() {
 
     resetOpinionComposer();
     setView('room');
+    syncAnalysisState();
     setStatus('landing-status', '');
   } catch (error) {
     showError('landing-error', error.message || 'Could not join that room.');
@@ -544,10 +569,6 @@ async function submitOrUpdateResponse() {
   }
 
   try {
-    const attachmentIds = await uploadSelectedFiles(
-      document.getElementById('opinion-image').files
-    );
-
     const mutationRef = state.viewerHasSubmitted
       ? api.opinions.updateOpinion
       : api.opinions.submitOpinion;
@@ -557,7 +578,7 @@ async function submitOrUpdateResponse() {
       joinToken: state.joinToken,
       choice,
       reason: reason || undefined,
-      attachmentIds,
+      attachmentIds: [],
     });
 
     document.getElementById('opinion-status').textContent = state.viewerHasSubmitted
@@ -612,8 +633,7 @@ async function startAnalysis() {
       roomId: state.roomId,
       hostToken: state.hostToken,
     });
-
-    await waitForAnalysisResult();
+    setStatus('opinion-status', 'Analysis started. Everyone in the room will update automatically.');
   } catch (error) {
     loadingEl.hidden = true;
     showError('opinion-error', error.message || 'Could not run analysis.');
@@ -635,9 +655,11 @@ async function restoreExistingSession() {
   state.joinToken = session.joinToken;
 
   try {
+    await ensureRoomSubscription();
     await refreshRoomState();
     resetOpinionComposer();
     setView('room');
+    syncAnalysisState();
   } catch {
     logAgentEvent('restoreExistingSession:failed', {
       hasRoomId: state.roomId != null,
@@ -665,9 +687,11 @@ document.getElementById('btn-join-room').addEventListener('click', joinRoom);
 document.getElementById('btn-back-landing').addEventListener('click', () => setView('landing'));
 document.getElementById('btn-do-create-room').addEventListener('click', createRoom);
 document.getElementById('btn-enter-room-as-host').addEventListener('click', async () => {
+  await ensureRoomSubscription();
   await refreshRoomState();
   resetOpinionComposer();
   setView('room');
+  syncAnalysisState();
 });
 
 document.getElementById('btn-copy-code').addEventListener('click', async () => {
@@ -710,6 +734,28 @@ document.getElementById('btn-submit-opinion').addEventListener('click', submitOr
 document.getElementById('opinions-list').addEventListener('click', handleReactionClick);
 document.getElementById('btn-analyze').addEventListener('click', startAnalysis);
 document.getElementById('btn-back-to-room').addEventListener('click', () => setView('room'));
+document.getElementById('btn-new-room').addEventListener('click', () => {
+  if (roomSubscription) {
+    roomSubscription();
+    roomSubscription = null;
+    roomSubscriptionKey = null;
+  }
+  clearSession();
+  state.roomId = null;
+  state.roomCode = null;
+  state.hostToken = null;
+  state.joinToken = null;
+  state.isHost = false;
+  state.topic = '';
+  state.participantName = '';
+  state.participantId = null;
+  state.viewerHasSubmitted = false;
+  state.opinions = [];
+  state.reactionsByOpinionId = {};
+  state.selectedOpinionIcon = null;
+  state.latestAnalysis = null;
+  setView('landing');
+});
 
 prefillJoinCodeFromUrl();
 setView('landing');
