@@ -192,6 +192,7 @@ function renderOpinionsList() {
     const card = document.createElement('div');
 
     card.className = 'opinion-card';
+    card.dataset.choice = opinion.choice;
     card.innerHTML = `
       <div class="opinion-topline">
         <span class="choice-pill choice-pill--${escapeHtml(opinion.choice)}">${escapeHtml(opinion.choice)}</span>

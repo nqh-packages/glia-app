@@ -19,25 +19,44 @@ function escapeHtml(value) {
 function renderSpectrum(spectrum, topic) {
   const el = document.getElementById('spectrum');
   el.innerHTML = `
-    <h2>${escapeHtml(topic)}</h2>
-    <div class="spectrum-bar">
-      <div class="spectrum-for" style="width: ${spectrum.yes_percentage}%">
-        ${spectrum.yes_percentage}% Yes
+    <div class="spectrum-shell">
+      <h2 class="results-topic">${escapeHtml(topic)}</h2>
+      <div class="spectrum-bar">
+        <div class="spectrum-segment spectrum-for" style="width: ${spectrum.yes_percentage}%">
+          <strong>${spectrum.yes_percentage}%</strong>
+          <span>Yes</span>
+        </div>
+        <div class="spectrum-segment spectrum-neutral" style="width: ${spectrum.neutral_percentage}%">
+          <strong>${spectrum.neutral_percentage}%</strong>
+          <span>Neutral</span>
+        </div>
+        <div class="spectrum-segment spectrum-against" style="width: ${spectrum.no_percentage}%">
+          <strong>${spectrum.no_percentage}%</strong>
+          <span>No</span>
+        </div>
       </div>
-      <div class="spectrum-neutral" style="width: ${spectrum.neutral_percentage}%">
-        ${spectrum.neutral_percentage}% Neutral
+      <div class="spectrum-legend">
+        <div class="spectrum-stat spectrum-stat--yes">
+          <span class="spectrum-stat__label">Yes</span>
+          <strong class="spectrum-stat__value">${spectrum.yes_percentage}%</strong>
+        </div>
+        <div class="spectrum-stat spectrum-stat--neutral">
+          <span class="spectrum-stat__label">Neutral</span>
+          <strong class="spectrum-stat__value">${spectrum.neutral_percentage}%</strong>
+        </div>
+        <div class="spectrum-stat spectrum-stat--no">
+          <span class="spectrum-stat__label">No</span>
+          <strong class="spectrum-stat__value">${spectrum.no_percentage}%</strong>
+        </div>
       </div>
-      <div class="spectrum-against" style="width: ${spectrum.no_percentage}%">
-        ${spectrum.no_percentage}% No
+      <div class="themes">
+        <h3>Key Themes</h3>
+        <ul class="theme-list">
+          ${spectrum.key_themes.map((theme) => `
+            <li>${escapeHtml(theme.theme)} (${theme.mention_count} mentions)</li>
+          `).join('')}
+        </ul>
       </div>
-    </div>
-    <div class="themes">
-      <h3>Key Themes</h3>
-      <ul>
-        ${spectrum.key_themes.map((theme) => `
-          <li>${escapeHtml(theme.theme)} (${theme.mention_count} mentions)</li>
-        `).join('')}
-      </ul>
     </div>
   `;
 }
@@ -46,7 +65,10 @@ function renderCamps(camps) {
   const el = document.getElementById('camps');
   el.innerHTML = camps.map((camp) => `
     <div class="camp camp--${camp.sentiment}">
-      <h3>${escapeHtml(camp.label)} (${camp.supporter_count} people)</h3>
+      <div class="camp-header">
+        <h3>${escapeHtml(camp.label)}</h3>
+        <span class="camp-meta">${camp.supporter_count} people</span>
+      </div>
       <p class="camp-position">${escapeHtml(camp.position)}</p>
       <h4>Reasons:</h4>
       <ul>

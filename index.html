@@ -4,14 +4,24 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Glia — Community Decision Synthesizer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <div class="page-aura" aria-hidden="true"></div>
   <main id="app">
     <!-- LANDING: Create or join a room -->
-    <section id="view-landing" class="view">
+    <section id="view-landing" class="view view-shell view-shell--hero">
+      <p class="eyebrow">Shared discussion synthesizer</p>
       <h1>Glia</h1>
-      <p class="subtitle">Start a discussion room. Collect opinions, gather votes, get a data-driven compromise.</p>
+      <p class="subtitle">Start a room, collect real positions, surface nuance, and generate a synthesis the group can actually work from.</p>
+      <div class="signal-band" aria-hidden="true">
+        <span class="signal-band__item signal-band__item--yes">Yes</span>
+        <span class="signal-band__item signal-band__item--neutral">Neutral</span>
+        <span class="signal-band__item signal-band__item--no">No</span>
+      </div>
 
       <div class="landing-actions">
         <button id="btn-create-room" type="button" class="btn btn-primary">Create a room</button>
@@ -28,9 +38,10 @@
     </section>
 
     <!-- CREATE ROOM: Host name + topic -->
-    <section id="view-create" class="view" hidden>
+    <section id="view-create" class="view view-shell" hidden>
+      <p class="eyebrow">Host setup</p>
       <h1>Create a room</h1>
-      <p class="subtitle">Set a topic. Share the code or link so others can join and share their views.</p>
+      <p class="subtitle">Frame the question clearly, then invite the room into a shared field of agreement, nuance, and dissent.</p>
 
       <div class="form-block">
         <label for="host-name" class="label">Your name</label>
@@ -48,9 +59,10 @@
     </section>
 
     <!-- ROOM CREATED: Show code + link + QR placeholder -->
-    <section id="view-room-created" class="view" hidden>
+    <section id="view-room-created" class="view view-shell" hidden>
+      <p class="eyebrow">Room ready</p>
       <h1>Room created</h1>
-      <p class="subtitle">Share this so others can join.</p>
+      <p class="subtitle">Share the code, send the link, and pull people into the discussion while the question is still fresh.</p>
       <div class="share-block">
         <div class="share-code">
           <span class="label">Code</span>
@@ -71,14 +83,15 @@
     </section>
 
     <!-- ROOM: Topic, opinions, submit, vote, analyze -->
-    <section id="view-room" class="view" hidden>
+    <section id="view-room" class="view view-shell view-shell--room" hidden>
       <header class="room-header">
+        <p class="eyebrow">Live room</p>
         <div class="room-title-row">
           <h1 id="room-topic-title" class="room-title">Topic</h1>
           <div class="room-title-actions" aria-label="Add your view">
-            <button type="button" id="btn-opinion-thumb-up" class="btn-icon" title="Thumbs up">👍</button>
-            <button type="button" id="btn-opinion-chat" class="btn-icon" title="Comment">💬</button>
-            <button type="button" id="btn-opinion-thumb-down" class="btn-icon" title="Thumbs down">👎</button>
+            <button type="button" id="btn-opinion-thumb-up" class="btn-icon btn-icon--yes" title="Yes">Y</button>
+            <button type="button" id="btn-opinion-chat" class="btn-icon btn-icon--neutral" title="Neutral">N</button>
+            <button type="button" id="btn-opinion-thumb-down" class="btn-icon btn-icon--no" title="No">X</button>
           </div>
         </div>
         <p class="room-meta">
@@ -115,7 +128,7 @@
         <div id="opinions-list" class="opinions-list">
           <!-- Cards rendered by renderer -->
         </div>
-        <p id="opinions-empty" class="empty-state">No responses yet. Add yours above.</p>
+        <p id="opinions-empty" class="empty-state">No responses yet. Mark a position above to open the composer.</p>
       </section>
 
       <!-- Host: Analyze -->
@@ -130,7 +143,8 @@
     </section>
 
     <!-- RESULTS (same structure as original Glia) -->
-    <section id="view-results" class="view" hidden>
+    <section id="view-results" class="view view-shell view-shell--results" hidden>
+      <p class="eyebrow">Synthesis</p>
       <h1>Results</h1>
       <div id="results-section">
         <div id="spectrum"></div>
