@@ -31,7 +31,8 @@ export default defineSchema({
     updatedAt: v.number()
   })
     .index("by_code", ["code"])
-    .index("by_hostToken", ["hostToken"]),
+    .index("by_hostToken", ["hostToken"])
+    .index("by_status", ["status"]),
 
   participants: defineTable({
     roomId: v.id("rooms"),
@@ -74,6 +75,8 @@ export default defineSchema({
     .index("by_opinionId", ["opinionId"])
     .index("by_participantId_opinionId", ["participantId", "opinionId"]),
 
+  // requestVersion for debugging skipped runs. If inputSnapshot/output grow
+  // large, consider a separate analysisBlobs table keyed by analysisId.
   analyses: defineTable({
     roomId: v.id("rooms"),
     status: v.union(v.literal("pending"), v.literal("success"), v.literal("failed")),
@@ -87,6 +90,13 @@ export default defineSchema({
       v.literal("autoTimer")
     ),
     error: v.optional(v.string()),
+    requestVersion: v.optional(v.number()),
     createdAt: v.number()
-  }).index("by_roomId_createdAt", ["roomId", "createdAt"])
+  }).index("by_roomId_createdAt", ["roomId", "createdAt"]),
+
+  rateLimits: defineTable({
+    key: v.string(),
+    count: v.number(),
+    windowEnd: v.number()
+  }).index("by_key", ["key"])
 });

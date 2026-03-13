@@ -78,11 +78,18 @@ export const submitOpinion = mutationGeneric({
       )
       .unique();
 
+    const timestamp = now();
     if (existingOpinion) {
-      throw new Error("You already submitted an opinion. Edit it instead.");
+      await ctx.db.patch(existingOpinion._id, {
+        choice: args.choice,
+        reason: args.reason?.trim() || undefined,
+        attachmentIds: args.attachmentIds,
+        updatedAt: timestamp
+      });
+      await maybeScheduleAutoCountAnalysis(ctx, room);
+      return { opinionId: existingOpinion._id };
     }
 
-    const timestamp = now();
     const opinionId = await ctx.db.insert("opinions", {
       roomId: room._id,
       participantId: participant._id,

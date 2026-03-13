@@ -10,6 +10,7 @@ import {
   now,
   startAnalysisRunRef
 } from "./lib";
+import { checkCreateRoomRateLimit, checkJoinRoomRateLimit } from "./rateLimit";
 
 async function getRoomByCodeOrThrow(db: any, code: string) {
   const room = await db
@@ -61,6 +62,7 @@ export const createRoom = mutationGeneric({
     origin: v.optional(v.string())
   },
   handler: async (ctx, args) => {
+    await checkCreateRoomRateLimit(ctx);
     const timestamp = now();
     let code = makeCode();
 
@@ -176,18 +178,19 @@ export const getRoomState = queryGeneric({
       return null;
     }
 
+    const ROOM_STATE_CAP = 500;
     const participants = await ctx.db
       .query("participants")
       .withIndex("by_roomId", (query: any) => query.eq("roomId", room._id))
-      .collect();
+      .take(ROOM_STATE_CAP);
     const opinions = await ctx.db
       .query("opinions")
       .withIndex("by_roomId", (query: any) => query.eq("roomId", room._id))
-      .collect();
+      .take(ROOM_STATE_CAP);
     const votes = await ctx.db
       .query("votes")
       .withIndex("by_roomId", (query: any) => query.eq("roomId", room._id))
-      .collect();
+      .take(ROOM_STATE_CAP);
 
     const participantMap = new Map(participants.map((participant: any) => [participant._id, participant]));
     const latestAnalysis = await getLatestAnalysis(ctx.db, room._id);
@@ -342,6 +345,7 @@ export const joinRoom = mutationGeneric({
   },
   handler: async (ctx, args) => {
     const room = await getRoomByCodeOrThrow(ctx.db, args.code.trim().toUpperCase());
+    await checkJoinRoomRateLimit(ctx, room._id);
 
     if (room.status === "closed") {
       throw new Error("This room is closed.");

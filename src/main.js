@@ -41,12 +41,18 @@ const state = {
 let convexClient = null;
 let roomSubscription = null;
 let roomSubscriptionKey = null;
+let roomPollingIntervalId = null;
 
 function logAgentEvent() {}
 
 function setView(viewId) {
   logAgentEvent('setView', { viewId });
   app.dataset.view = viewId;
+  if (viewId !== 'room') {
+    stopRoomPolling();
+  } else {
+    startRoomPolling();
+  }
 }
 
 function setStatus(elementId, message) {
@@ -401,6 +407,25 @@ function stopRoomSubscription() {
   roomSubscriptionKey = null;
 }
 
+const ROOM_POLL_INTERVAL_MS = 20000;
+const RESUBSCRIBE_DELAY_MS = 3000;
+
+function startRoomPolling() {
+  stopRoomPolling();
+  roomPollingIntervalId = setInterval(() => {
+    if (app.dataset.view === 'room') {
+      refreshRoomState();
+    }
+  }, ROOM_POLL_INTERVAL_MS);
+}
+
+function stopRoomPolling() {
+  if (roomPollingIntervalId != null) {
+    clearInterval(roomPollingIntervalId);
+    roomPollingIntervalId = null;
+  }
+}
+
 async function ensureRoomSubscription() {
   const args = getRoomStateArgs();
   if (!args) {
@@ -428,7 +453,8 @@ async function ensureRoomSubscription() {
       }
     },
     (error) => {
-      showError('opinion-error', error.message || 'Realtime sync disconnected.');
+      showError('opinion-error', error.message || 'Realtime sync disconnected. Reconnecting…');
+      setTimeout(() => ensureRoomSubscription(), RESUBSCRIBE_DELAY_MS);
     }
   );
 }

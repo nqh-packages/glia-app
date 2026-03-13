@@ -3,9 +3,13 @@
   "name": "glia-app",
   "main": "worker.js",
   "compatibility_date": "2026-03-12",
+  "workers_dev": true,
   "assets": {
     "directory": "./dist",
     "binding": "ASSETS",
     "not_found_handling": "single-page-application"
-  }
+  },
+  "routes": [
+    { "pattern": "glia-legacy.ngoquochuy.com", "custom_domain": true }
+  ]
 }
