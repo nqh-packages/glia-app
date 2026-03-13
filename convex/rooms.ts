@@ -263,18 +263,19 @@ export const getAnalysisSnapshot = queryGeneric({
       throw new Error("Room not found.");
     }
 
+    const ANALYSIS_SNAPSHOT_CAP = 500;
     const participants = await ctx.db
       .query("participants")
       .withIndex("by_roomId", (query: any) => query.eq("roomId", room._id))
-      .collect();
+      .take(ANALYSIS_SNAPSHOT_CAP);
     const opinions = await ctx.db
       .query("opinions")
       .withIndex("by_roomId", (query: any) => query.eq("roomId", room._id))
-      .collect();
+      .take(ANALYSIS_SNAPSHOT_CAP);
     const votes = await ctx.db
       .query("votes")
       .withIndex("by_roomId", (query: any) => query.eq("roomId", room._id))
-      .collect();
+      .take(ANALYSIS_SNAPSHOT_CAP);
 
     const participantMap = new Map(participants.map((participant: any) => [participant._id, participant]));
     const voteMap = new Map<string, any[]>();

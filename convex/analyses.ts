@@ -59,6 +59,7 @@ export const startAnalysisRun = mutationGeneric({
       model: ANALYSIS_MODEL,
       promptVersion: PROMPT_VERSION,
       trigger: args.trigger,
+      requestVersion: args.requestVersion,
       createdAt: now()
     });
 

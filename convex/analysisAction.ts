@@ -1,5 +1,8 @@
 "use node";
 
+// For very large rooms, inputSnapshot/output can grow; consider storing them in
+// a separate analysisBlobs table keyed by analysisId and joining when needed.
+
 import { GoogleGenAI } from "@google/genai";
 import { actionGeneric } from "convex/server";
 import { v } from "convex/values";

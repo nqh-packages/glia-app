@@ -8,7 +8,7 @@ export async function checkCreateRoomRateLimit(ctx: { db: any }) {
   await checkRateLimit(ctx, "create:global", CREATE_ROOM_LIMIT, WINDOW_MS);
 }
 
-export async function checkJoinRoomRateLimit(ctx: { db: any }, roomId: string) {
+export async function checkJoinRoomRateLimit(ctx: { db: any }, roomId: string | { toString(): string }) {
   await checkRateLimit(ctx, `join:${roomId}`, JOIN_ROOM_LIMIT_PER_ROOM, WINDOW_MS);
 }
 

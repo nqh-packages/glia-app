@@ -101,9 +101,13 @@ async function getAppConfig() {
 
   logAgentEvent('getAppConfig', { hasLocalConfig: !!localConfig });
 
-  return localConfig ?? globalThis.APP_CONFIG ?? {
-    convexUrl: import.meta.env.VITE_CONVEX_URL,
-  };
+  // Prod build sets VITE_CONVEX_URL; use it when set so prod points at prod Convex.
+  const convexUrl =
+    (import.meta.env.VITE_CONVEX_URL && import.meta.env.VITE_CONVEX_URL.trim()) ||
+    localConfig?.convexUrl ||
+    globalThis.APP_CONFIG?.convexUrl;
+
+  return { convexUrl: convexUrl ?? null };
 }
 
 async function getConvexClient() {
