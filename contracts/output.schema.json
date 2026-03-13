@@ -29,7 +29,7 @@
           },
           "summary": {
             "type": "string",
-            "description": "Short AI summary of the participant's response"
+            "description": "One concise sentence summarizing the participant's response"
           },
           "choice": {
             "type": "string",
@@ -59,18 +59,18 @@
     },
     "camps": {
       "type": "array",
-      "description": "The identified response groups (usually 2-3)",
+      "description": "The identified response groups (usually 2-3 concise camps)",
       "items": {
         "type": "object",
         "required": ["label", "position", "supporter_count", "reasons", "sentiment", "representative_quotes"],
         "properties": {
           "label": {
             "type": "string",
-            "description": "Short camp name (e.g., 'Pro-Security', 'Cost-Conscious')"
+            "description": "Very short camp name"
           },
           "position": {
             "type": "string",
-            "description": "One-sentence summary of what this camp wants"
+            "description": "One concise sentence describing what this camp wants"
           },
           "supporter_count": {
             "type": "integer",
@@ -79,7 +79,7 @@
           "reasons": {
             "type": "array",
             "items": { "type": "string" },
-            "description": "Key reasons this camp holds their position"
+            "description": "1-3 short reasons this camp holds its position"
           },
           "sentiment": {
             "type": "string",
@@ -89,7 +89,7 @@
           "representative_quotes": {
             "type": "array",
             "items": { "type": "string" },
-            "description": "1-2 actual quotes from the input that represent this camp"
+            "description": "At most 1-2 short input quotes that represent this camp"
           }
         }
       }
@@ -121,7 +121,7 @@
             "properties": {
               "theme": {
                 "type": "string",
-                "description": "Recurring topic or concern raised across participant responses"
+                "description": "Short recurring topic or concern"
               },
               "mention_count": {
                 "type": "integer",
@@ -129,7 +129,7 @@
               }
             }
           },
-          "description": "Most mentioned themes across all responses"
+          "description": "Most mentioned themes across all responses, expressed as short phrases"
         }
       }
     },
@@ -140,11 +140,11 @@
       "properties": {
         "summary": {
           "type": "string",
-          "description": "One-sentence compromise proposal"
+          "description": "One concise sentence describing the compromise"
         },
         "details": {
           "type": "string",
-          "description": "1-2 paragraph explanation of the compromise"
+          "description": "At most 2 short sentences explaining the compromise"
         },
         "addresses": {
           "type": "array",
@@ -157,7 +157,7 @@
               },
               "how_addressed": {
                 "type": "string",
-                "description": "Concrete way the compromise addresses that camp's needs or objections"
+                "description": "One short sentence describing how the compromise addresses that camp"
               }
             }
           },
