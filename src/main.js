@@ -22,10 +22,6 @@ const REACTION_BUTTONS = [
 const app = document.getElementById('app');
 const loadingEl = document.getElementById('loading');
 
-// #region agent log
-fetch('http://127.0.0.1:7243/ingest/fa1b5525-06c8-44e5-99a4-e646f6ad2a35',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'src/main.js:init',message:'module init',data:{appExists:!!app,loadingExists:!!loadingEl,href:window.location.href},timestamp:Date.now(),hypothesisId:'H1'})}).catch(()=>{});
-// #endregion
-
 const state = {
   roomId: null,
   roomCode: null,
@@ -44,11 +40,19 @@ const state = {
 
 let convexClient = null;
 
+function logAgentEvent() {}
+
 function setView(viewId) {
-  // #region agent log
-  fetch('http://127.0.0.1:7243/ingest/fa1b5525-06c8-44e5-99a4-e646f6ad2a35',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'src/main.js:setView',message:'setView called',data:{viewId,appExists:!!app},timestamp:Date.now(),hypothesisId:'H1'})}).catch(()=>{});
-  // #endregion
+  logAgentEvent('setView', { viewId });
   app.dataset.view = viewId;
+}
+
+function setStatus(elementId, message) {
+  const el = document.getElementById(elementId);
+  if (!el) {
+    return;
+  }
+  el.textContent = message;
 }
 
 function showError(elementId, message) {
@@ -63,14 +67,31 @@ function clearError(elementId) {
   el.hidden = true;
 }
 
+function setInputInvalid(elementId, isInvalid) {
+  document.getElementById(elementId)?.classList.toggle('input-invalid', isInvalid);
+}
+
+function clearInputInvalid(...elementIds) {
+  elementIds.forEach((elementId) => setInputInvalid(elementId, false));
+}
+
+function setButtonBusy(buttonId, isBusy, busyLabel, idleLabel) {
+  const button = document.getElementById(buttonId);
+  if (!button) {
+    return;
+  }
+  button.disabled = isBusy;
+  if (busyLabel && idleLabel) {
+    button.textContent = isBusy ? busyLabel : idleLabel;
+  }
+}
+
 async function getAppConfig() {
   const localConfig = await import('../config.js')
     .then((module) => module.APP_CONFIG ?? null)
     .catch(() => null);
 
-  // #region agent log
-  fetch('http://127.0.0.1:7243/ingest/fa1b5525-06c8-44e5-99a4-e646f6ad2a35',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'src/main.js:getAppConfig',message:'config resolved',data:{hasLocalConfig:!!localConfig,localConfigUrlLength:localConfig?.convexUrl?.length ?? 0,hasGlobalConfig:!!globalThis.APP_CONFIG,globalConfigUrlLength:globalThis.APP_CONFIG?.convexUrl?.length ?? 0,hasEnvUrl:!!import.meta.env.VITE_CONVEX_URL,envUrlLength:import.meta.env.VITE_CONVEX_URL?.length ?? 0},timestamp:Date.now(),hypothesisId:'H4'})}).catch(()=>{});
-  // #endregion
+  logAgentEvent('getAppConfig', { hasLocalConfig: !!localConfig });
 
   return localConfig ?? globalThis.APP_CONFIG ?? {
     convexUrl: import.meta.env.VITE_CONVEX_URL,
@@ -85,9 +106,7 @@ async function getConvexClient() {
   const config = await getAppConfig();
   const convexUrl = config?.convexUrl?.trim();
 
-  // #region agent log
-  fetch('http://127.0.0.1:7243/ingest/fa1b5525-06c8-44e5-99a4-e646f6ad2a35',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'src/main.js:getConvexClient',message:'convex url check',data:{hasConfig:!!config,hasConvexUrl:!!convexUrl,urlLength:convexUrl?.length ?? 0,isPlaceholder:!!convexUrl?.includes('your-convex-deployment')},timestamp:Date.now(),hypothesisId:'H4'})}).catch(()=>{});
-  // #endregion
+  logAgentEvent('getConvexClient', { hasConvexUrl: !!convexUrl });
 
   if (!convexUrl || convexUrl.includes('your-convex-deployment')) {
     throw new Error('Missing Convex URL. Add `config.js` or set `VITE_CONVEX_URL`.');
@@ -105,6 +124,11 @@ async function convexQuery(ref, args) {
 async function convexMutation(ref, args) {
   const client = await getConvexClient();
   return client.mutation(ref, args);
+}
+
+async function convexAction(ref, args) {
+  const client = await getConvexClient();
+  return client.action(ref, args);
 }
 
 function persistSession() {
@@ -231,6 +255,74 @@ function updateRoomUI() {
   renderOpinionsList();
 }
 
+async function copyText(value, { statusId, buttonId, successMessage = 'Copied.' } = {}) {
+  const text = value ?? '';
+  try {
+    await navigator.clipboard.writeText(text);
+    if (statusId) {
+      setStatus(statusId, successMessage);
+    }
+  } catch {
+    const temp = document.createElement('textarea');
+    temp.value = text;
+    document.body.appendChild(temp);
+    temp.select();
+    const didCopy = document.execCommand('copy');
+    document.body.removeChild(temp);
+    if (statusId) {
+      setStatus(
+        statusId,
+        didCopy ? successMessage : 'Copy failed. You can still select and copy the text manually.'
+      );
+    }
+  }
+
+  if (buttonId) {
+    const button = document.getElementById(buttonId);
+    if (button) {
+      const originalLabel = button.dataset.originalLabel ?? button.textContent;
+      button.dataset.originalLabel = originalLabel;
+      button.textContent = 'Copied';
+      window.setTimeout(() => {
+        button.textContent = originalLabel;
+      }, 1400);
+    }
+  }
+}
+
+async function loadRoomShareAssets(code, joinUrl) {
+  const qrImage = document.getElementById('display-qr-image');
+  const qrLoading = document.getElementById('qr-loading');
+  const downloadLink = document.getElementById('btn-download-qr');
+
+  clearError('share-error');
+  setStatus('share-status', 'Generating share assets...');
+  qrImage.hidden = true;
+  qrLoading.hidden = false;
+  downloadLink.hidden = true;
+  document.getElementById('display-join-link').value = joinUrl;
+
+  try {
+    const payload = await convexAction(api.shareAction.generateJoinQrCode, {
+      code,
+      origin: window.location.origin,
+    });
+
+    document.getElementById('display-join-link').value = payload.joinUrl;
+    qrImage.src = payload.dataUrl;
+    qrImage.hidden = false;
+    qrLoading.hidden = true;
+    downloadLink.href = payload.dataUrl;
+    downloadLink.hidden = false;
+    setStatus('share-status', 'Share the code, link, or QR code.');
+  } catch (error) {
+    qrLoading.hidden = false;
+    qrLoading.textContent = 'QR unavailable';
+    showError('share-error', error.message || 'Could not generate the QR code.');
+    setStatus('share-status', '');
+  }
+}
+
 async function refreshRoomState({ showResultsWhenReady = false } = {}) {
   if (!state.roomId) {
     return;
@@ -331,19 +423,23 @@ async function uploadSelectedFiles(fileList) {
 
 async function createRoom() {
   clearError('create-error');
+  setStatus('create-status', '');
+  clearInputInvalid('host-name', 'room-topic');
 
   const hostName = document.getElementById('host-name').value.trim();
   const topic = document.getElementById('room-topic').value.trim();
 
   if (!hostName || !topic) {
+    setInputInvalid('host-name', !hostName);
+    setInputInvalid('room-topic', !topic);
     showError('create-error', 'Enter your name and a topic.');
     return;
   }
 
+  setButtonBusy('btn-do-create-room', true, 'Creating...', 'Create room');
+  setStatus('create-status', 'Creating room...');
   try {
-    // #region agent log
-    fetch('http://127.0.0.1:7243/ingest/fa1b5525-06c8-44e5-99a4-e646f6ad2a35',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'src/main.js:createRoom',message:'create room start',data:{hasHostName:!!hostName,topicLength:topic.length},timestamp:Date.now(),hypothesisId:'H5'})}).catch(()=>{});
-    // #endregion
+    logAgentEvent('createRoom:start', { hasHostName: !!hostName, topicLength: topic.length });
     const result = await convexMutation(api.rooms.createRoom, {
       hostName,
       topic,
@@ -367,28 +463,41 @@ async function createRoom() {
     persistSession();
 
     document.getElementById('display-room-code').textContent = result.code;
-    document.getElementById('display-join-link').value = result.joinUrl;
     setView('room-created');
+    await loadRoomShareAssets(result.code, result.joinUrl);
+    setStatus('create-status', '');
   } catch (error) {
-    // #region agent log
-    fetch('http://127.0.0.1:7243/ingest/fa1b5525-06c8-44e5-99a4-e646f6ad2a35',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'src/main.js:createRoom',message:'create room failed',data:{errorMessage:error?.message ?? 'unknown'},timestamp:Date.now(),hypothesisId:'H5'})}).catch(()=>{});
-    // #endregion
+    logAgentEvent('createRoom:failed', { errorMessage: error?.message ?? 'unknown' });
     showError('create-error', error.message || 'Could not create the room.');
+    setStatus('create-status', '');
+  } finally {
+    setButtonBusy('btn-do-create-room', false, 'Creating...', 'Create room');
   }
 }
 
 async function joinRoom() {
   clearError('landing-error');
+  setStatus('landing-status', '');
+  clearInputInvalid('join-code', 'join-name');
 
   const code = document.getElementById('join-code').value.trim().toUpperCase();
   const name = document.getElementById('join-name').value.trim();
 
   if (!code || !name) {
+    setInputInvalid('join-code', !code);
+    setInputInvalid('join-name', !name);
     showError('landing-error', 'Enter a code and your name.');
     return;
   }
 
+  setButtonBusy('btn-join-room', true, 'Joining...', 'Join');
+  setStatus('landing-status', 'Joining room...');
   try {
+    const room = await convexQuery(api.rooms.getRoomByCode, { code });
+    if (!room) {
+      throw new Error('Room not found. Check the code and try again.');
+    }
+
     const result = await convexMutation(api.rooms.joinRoom, { code, name });
 
     state.roomId = result.roomId;
@@ -400,11 +509,26 @@ async function joinRoom() {
     state.participantId = result.participantId;
     state.viewerHasSubmitted = false;
 
-    await refreshRoomState();
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      try {
+        await refreshRoomState();
+        break;
+      } catch (error) {
+        if (attempt === 2) {
+          throw error;
+        }
+        await new Promise((resolve) => window.setTimeout(resolve, 400));
+      }
+    }
+
     resetOpinionComposer();
     setView('room');
+    setStatus('landing-status', '');
   } catch (error) {
     showError('landing-error', error.message || 'Could not join that room.');
+    setStatus('landing-status', '');
+  } finally {
+    setButtonBusy('btn-join-room', false, 'Joining...', 'Join');
   }
 }
 
@@ -499,9 +623,7 @@ async function startAnalysis() {
 async function restoreExistingSession() {
   const session = hydrateSession();
 
-  // #region agent log
-  fetch('http://127.0.0.1:7243/ingest/fa1b5525-06c8-44e5-99a4-e646f6ad2a35',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'src/main.js:restoreExistingSession',message:'restore session start',data:{hasSession:!!session,hasRoomId:!!session?.roomId,hasJoinToken:!!session?.joinToken},timestamp:Date.now(),hypothesisId:'H3'})}).catch(()=>{});
-  // #endregion
+  logAgentEvent('restoreExistingSession:start', { hasSession: !!session });
 
   if (!session?.roomId || !session?.joinToken) {
     return;
@@ -517,9 +639,10 @@ async function restoreExistingSession() {
     resetOpinionComposer();
     setView('room');
   } catch {
-    // #region agent log
-    fetch('http://127.0.0.1:7243/ingest/fa1b5525-06c8-44e5-99a4-e646f6ad2a35',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'src/main.js:restoreExistingSession',message:'restore session failed',data:{roomId:state.roomId != null,hasHostToken:!!state.hostToken},timestamp:Date.now(),hypothesisId:'H3'})}).catch(()=>{});
-    // #endregion
+    logAgentEvent('restoreExistingSession:failed', {
+      hasRoomId: state.roomId != null,
+      hasHostToken: !!state.hostToken,
+    });
     clearSession();
   }
 }
@@ -548,15 +671,35 @@ document.getElementById('btn-enter-room-as-host').addEventListener('click', asyn
 });
 
 document.getElementById('btn-copy-code').addEventListener('click', async () => {
-  await navigator.clipboard.writeText(document.getElementById('display-room-code').textContent);
+  await copyText(document.getElementById('display-room-code').textContent, {
+    statusId: 'share-status',
+    buttonId: 'btn-copy-code',
+    successMessage: 'Code copied.',
+  });
 });
 
 document.getElementById('btn-copy-link').addEventListener('click', async () => {
-  await navigator.clipboard.writeText(document.getElementById('display-join-link').value);
+  await copyText(document.getElementById('display-join-link').value, {
+    statusId: 'share-status',
+    buttonId: 'btn-copy-link',
+    successMessage: 'Link copied.',
+  });
 });
 
 document.getElementById('btn-copy-code-inroom').addEventListener('click', async () => {
-  await navigator.clipboard.writeText(state.roomCode ?? '');
+  await copyText(state.roomCode ?? '', {
+    statusId: 'opinion-status',
+    buttonId: 'btn-copy-code-inroom',
+    successMessage: 'Invite code copied.',
+  });
+});
+
+document.getElementById('btn-copy-link-inroom').addEventListener('click', async () => {
+  await copyText(`${window.location.origin}/?code=${encodeURIComponent(state.roomCode ?? '')}`, {
+    statusId: 'opinion-status',
+    buttonId: 'btn-copy-link-inroom',
+    successMessage: 'Invite link copied.',
+  });
 });
 
 RESPONSE_BUTTON_IDS.forEach((id) => {

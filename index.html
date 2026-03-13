@@ -28,12 +28,13 @@
         <div class="join-block">
           <label for="join-code" class="label">Join with code</label>
           <div class="join-row">
-            <input type="text" id="join-code" placeholder="e.g. ABC12" maxlength="8" autocomplete="off">
-            <input type="text" id="join-name" placeholder="Your name" class="join-name">
+            <input type="text" id="join-code" placeholder="e.g. ABC12" maxlength="8" autocomplete="off" required>
+            <input type="text" id="join-name" placeholder="Your name" class="join-name" required>
             <button id="btn-join-room" type="button" class="btn btn-secondary">Join</button>
           </div>
         </div>
       </div>
+      <p id="landing-status" class="status" aria-live="polite"></p>
       <p id="landing-error" class="error" hidden></p>
     </section>
 
@@ -45,16 +46,17 @@
 
       <div class="form-block">
         <label for="host-name" class="label">Your name</label>
-        <input type="text" id="host-name" placeholder="Host name" class="input">
+        <input type="text" id="host-name" placeholder="Host name" class="input" required>
       </div>
       <div class="form-block">
         <label for="room-topic" class="label">Topic / question</label>
-        <textarea id="room-topic" class="input textarea" placeholder="What should the group decide or discuss?" rows="3"></textarea>
+        <textarea id="room-topic" class="input textarea" placeholder="What should the group decide or discuss?" rows="3" required></textarea>
       </div>
       <div class="form-actions">
         <button id="btn-back-landing" type="button" class="btn btn-secondary">Back</button>
         <button id="btn-do-create-room" type="button" class="btn btn-primary">Create room</button>
       </div>
+      <p id="create-status" class="status" aria-live="polite"></p>
       <p id="create-error" class="error" hidden></p>
     </section>
 
@@ -74,11 +76,17 @@
           <input type="text" id="display-join-link" readonly class="input input-readonly">
           <button id="btn-copy-link" type="button" class="btn btn-small">Copy link</button>
         </div>
-        <div id="qr-placeholder" class="qr-placeholder" aria-hidden="true">
+        <div id="qr-placeholder" class="qr-placeholder">
           <span class="qr-label">QR code</span>
-          <div class="qr-box">QR</div>
+          <img id="display-qr-image" class="qr-image" alt="Room join QR code" hidden>
+          <div id="qr-loading" class="qr-box">Loading QR…</div>
+          <div class="qr-actions">
+            <a id="btn-download-qr" class="btn btn-small" download="glia-room-qr.png" hidden>Download QR</a>
+          </div>
         </div>
       </div>
+      <p id="share-status" class="status" aria-live="polite"></p>
+      <p id="share-error" class="error" hidden></p>
       <button id="btn-enter-room-as-host" type="button" class="btn btn-primary">Enter room</button>
     </section>
 
@@ -105,6 +113,7 @@
         <span class="label">Invite: </span>
         <code id="room-code-inroom">—</code>
         <button id="btn-copy-code-inroom" type="button" class="btn btn-small">Copy code</button>
+        <button id="btn-copy-link-inroom" type="button" class="btn btn-small">Copy link</button>
       </div>
 
       <!-- Submit response (shown when user clicks 👍 / 💬 / 👎) -->
@@ -158,7 +167,6 @@
   </main>
 
   <script>
-    // #region agent log
     const showStartupError = (message) => {
       const app = document.getElementById('app');
       const errorEl = document.getElementById('landing-error');
@@ -171,17 +179,11 @@
       }
     };
 
-    fetch('http://127.0.0.1:7243/ingest/fa1b5525-06c8-44e5-99a4-e646f6ad2a35',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'index.html:inline',message:'inline bootstrap',data:{protocol:window.location.protocol,appExists:!!document.getElementById('app'),moduleScriptCount:document.querySelectorAll('script[type="module"]').length},timestamp:Date.now(),hypothesisId:'H2'})}).catch(()=>{});
     window.addEventListener('error', (event) => {
-      fetch('http://127.0.0.1:7243/ingest/fa1b5525-06c8-44e5-99a4-e646f6ad2a35',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'index.html:error',message:'window error',data:{message:event.message,filename:event.filename},timestamp:Date.now(),hypothesisId:'H2'})}).catch(()=>{});
       if (String(event.message || '').includes('Failed to resolve module specifier')) {
         showStartupError('This app now needs the Vite dev server. Start it with `npm run dev` and open that URL instead of serving the files directly.');
       }
     });
-    window.addEventListener('unhandledrejection', (event) => {
-      fetch('http://127.0.0.1:7243/ingest/fa1b5525-06c8-44e5-99a4-e646f6ad2a35',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'index.html:rejection',message:'unhandled rejection',data:{reason:String(event.reason)},timestamp:Date.now(),hypothesisId:'H3'})}).catch(()=>{});
-    });
-    // #endregion
   </script>
   <script type="module" src="src/main.js"></script>
 </body>
