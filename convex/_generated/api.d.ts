@@ -13,6 +13,7 @@ import type * as analysisAction from "../analysisAction.js";
 import type * as http from "../http.js";
 import type * as lib from "../lib.js";
 import type * as opinions from "../opinions.js";
+import type * as prompts from "../prompts.js";
 import type * as rooms from "../rooms.js";
 import type * as schemaReview from "../schemaReview.js";
 import type * as shareAction from "../shareAction.js";
@@ -30,6 +31,7 @@ declare const fullApi: ApiFromModules<{
   http: typeof http;
   lib: typeof lib;
   opinions: typeof opinions;
+  prompts: typeof prompts;
   rooms: typeof rooms;
   schemaReview: typeof schemaReview;
   shareAction: typeof shareAction;
