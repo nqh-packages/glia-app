@@ -95,18 +95,17 @@ function setButtonBusy(buttonId, isBusy, busyLabel, idleLabel) {
 }
 
 async function getAppConfig() {
+  const envUrl = import.meta.env.VITE_CONVEX_URL && import.meta.env.VITE_CONVEX_URL.trim();
+  if (envUrl) {
+    return { convexUrl: envUrl };
+  }
   const localConfig = await import(/* @vite-ignore */ '../config.js')
     .then((module) => module.APP_CONFIG ?? null)
     .catch(() => null);
 
   logAgentEvent('getAppConfig', { hasLocalConfig: !!localConfig });
 
-  // Prod build sets VITE_CONVEX_URL; use it when set so prod points at prod Convex.
-  const convexUrl =
-    (import.meta.env.VITE_CONVEX_URL && import.meta.env.VITE_CONVEX_URL.trim()) ||
-    localConfig?.convexUrl ||
-    globalThis.APP_CONFIG?.convexUrl;
-
+  const convexUrl = localConfig?.convexUrl || globalThis.APP_CONFIG?.convexUrl;
   return { convexUrl: convexUrl ?? null };
 }
 
